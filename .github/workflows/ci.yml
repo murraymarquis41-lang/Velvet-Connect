@@ -1,0 +1,62 @@
+name: CI
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    name: Build & Test
+    runs-on: macos-latest
+    env:
+      XCODE_PROJECT: "VelvetConnect.xcodeproj"
+      XCODE_SCHEME: "VelvetConnect"
+      DESTINATION: "platform=iOS Simulator,name=iPhone 14,OS=17.0"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install xcpretty
+        run: gem install xcpretty --no-document
+
+      - name: Install CocoaPods (if Podfile exists)
+        run: |
+          if [ -f Podfile ]; then
+            gem install cocoapods --no-document
+            pod install --repo-update
+          fi
+
+      - name: Resolve Swift packages (if Package.swift exists)
+        run: |
+          if [ -f Package.swift ]; then
+            swift package resolve
+          fi
+
+      - name: Show xcodebuild settings
+        run: |
+          xcodebuild -version
+          xcrun simctl list
+
+      - name: Build (simulator, code signing disabled)
+        run: |
+          set -o pipefail
+          xcodebuild -project "$XCODE_PROJECT" -scheme "$XCODE_SCHEME" -sdk iphonesimulator -destination "$DESTINATION" clean build CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" | xcpretty
+
+      - name: Test
+        run: |
+          set -o pipefail
+          xcodebuild test -project "$XCODE_PROJECT" -scheme "$XCODE_SCHEME" -destination "$DESTINATION" -enableCodeCoverage YES CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" | xcpretty
+
+      - name: Archive (create .xcarchive, signing disabled)
+        run: |
+          set -o pipefail
+          ARCHIVE_PATH="${{ runner.temp }}/$XCODE_SCHEME.xcarchive"
+          xcodebuild -project "$XCODE_PROJECT" -scheme "$XCODE_SCHEME" -configuration Release -archivePath "$ARCHIVE_PATH" archive CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" | xcpretty
+          echo "ARCHIVE_PATH=$ARCHIVE_PATH" >> $GITHUB_ENV
+
+      - name: Upload xcarchive artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: xcarchive
+          path: ${{ env.ARCHIVE_PATH }}
