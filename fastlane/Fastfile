@@ -1,0 +1,21 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Build an IPA locally (unsigned placeholder). Update with signing/profiles when ready."
+  lane :ci_build do
+    # This lane builds using the xcodeproj and a template exportOptions.plist.
+    build_app(
+      workspace: nil, # using .xcodeproj, not workspace
+      project: "VelvetConnect.xcodeproj",
+      scheme: "VelvetConnect",
+      configuration: "Release",
+      export_options: {
+        provisioningProfiles: {}
+      },
+      export_method: "ad-hoc", # placeholder; change to app-store/testflight when adding credentials
+      clean: true,
+      output_directory: "./fastlane/build"
+    )
+    UI.message("Build finished. The IPA/export files are in ./fastlane/build")
+  end
+end
