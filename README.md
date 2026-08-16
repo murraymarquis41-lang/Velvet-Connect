@@ -1,3 +1,11 @@
+# VELVET Connect
+
+> **Public launch: Tuesday, January 5, 2027 at 10:00 a.m. ET**  
+> Dating with depth, designed with taste. Early access is opening for people who value chemistry, clarity, and real intention.  
+> **Watch this repository and join the early-access campaign for launch updates.**
+
+---
+
 VELVET Connect
 
 VELVET Connect is an exclusive yet affordable social dating platform designed to help users build meaningful connections through a polished, safe, and modern mobile experience.
