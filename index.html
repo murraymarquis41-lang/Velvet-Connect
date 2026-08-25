@@ -1,322 +1,95 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Velvet Connect – Luxury Dating</title>
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#0a0015">
-    <link rel="manifest" href="data:application/json;base64,ewogICJuYW1lIjogIlZlbHZldCBDb25uZWN0IiwKICAic2hvcnRfbmFtZSI6ICJWQ29ubmVjdCIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMGEwMDE1IiwKICAidGhlbWVfY29sb3IiOiAiIzBhMDAxNSIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImRhdGE6aW1hZ2UvcG5nO2Jhc2U2NCxpVkJPUncwS0dnb0FBQUFOU1VoRVVGa2ZZMnRVQjBBQUFBQURBUlZSRU9BQUFBQVFBQUFBRUFDQUFBQUFBY0FBQUFBQUFBQUFBQUFBQUFFQUFBQUFBQUFBQUFnQUFBQUFBQkFBQUFBQUFCZ0FBQUFBQUNBQUFBQUFBSEFBQUFBQUFkQUFBQUFBQWVBQUFBQUFCNEFBQUFBQUhpQUFBQUFBSHVBQUFBQUFDeEFBQUFBQU1nQUFBQUFESVFBQUFBQXlNQUFBQUFNakFBQUFBREpBQUFBQUF5VUFBQUFBTW1BQUFBQURKd0FBQUFBeWdBQUFBQU1wQUFBQUFES1FBQUFBQXlvQUFBQUFNckFBQUFBREwoKICAgIH0KICBdLAogICJzY29wZSI6ICIvIiwKICAibGF1bmNoX2hhbmRsZXIiOiB7CiAgICAicHJvdG9jb2wiOiAiZGF0YTppbWFnZS9wbmc7YmFzZTY0IiwKICAgICJwbGF0Zm9ybSI6ICJ3ZWJhcHAiLAogICAgImNsaWVudF9tYW5pZmVzdCI6ICJodHRwczovL2V4YW1wbGUuY29tL21hbmlmZXN0Lmpzb24iCiAgfQp9">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0a0015; color: #fff; overflow-x: hidden; height: 100vh; display: flex; flex-direction: column; }
-        .app-container { flex:1; overflow-y: auto; position: relative; }
-        .page { display: none; padding: 24px 20px 100px; min-height: 100%; animation: fadeSlide 0.4s ease; }
-        .page.active { display: block; }
-        @keyframes fadeSlide { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .glass { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); padding: 24px; margin-bottom: 16px; }
-        h1, h2, h3 { font-weight: 600; letter-spacing: -0.5px; }
-        .btn { display: inline-block; width: 100%; padding: 16px; border-radius: 50px; font-weight: 700; text-align: center; background: linear-gradient(135deg, #ff006e, #ff4da6); color: #fff; border: none; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; font-size: 1rem; }
-        .btn:active { transform: scale(0.97); }
-        .btn-outline { background: transparent; border: 2px solid #ff006e; color: #ff006e; background: rgba(255,0,110,0.05); }
-        .input-group { margin-bottom: 20px; }
-        .input-group label { display: block; margin-bottom: 6px; font-size: 0.85rem; color: #ccc; }
-        .input-group input, .input-group textarea { width: 100%; padding: 14px; border-radius: 12px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.1); color: #fff; font-size: 1rem; outline: none; }
-        .input-group input:focus { border-color: #ff006e; box-shadow: 0 0 20px rgba(255,0,110,0.3); }
-        .nav-bottom { position: fixed; bottom: 0; left:0; right:0; background: rgba(10,0,21,0.9); backdrop-filter: blur(30px); display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid rgba(255,255,255,0.1); z-index:10; }
-        .nav-item { color: #888; text-align: center; font-size: 0.75rem; transition: 0.2s; }
-        .nav-item.active { color: #ff006e; }
-        .nav-item i { font-size: 1.4rem; display: block; margin-bottom: 4px; }
-        .profile-photo { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; border: 3px solid #ff006e; }
-        .card-swipe { background: rgba(255,255,255,0.03); border-radius: 24px; overflow: hidden; position: relative; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
-        .match-animation { text-align: center; padding: 40px; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Velvet Connect – Luxury Dating</title>
+  <meta name="theme-color" content="#0a0015">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: #0a0015; color: #fff; }
+    button, input, textarea { font: inherit; }
+    .environment-banner { background: #5b1738; padding: 8px 16px; text-align: center; font-size: .78rem; letter-spacing: .08em; }
+    .app-container { max-width: 560px; min-height: calc(100vh - 32px); margin: 0 auto; }
+    .page { display: none; min-height: 100%; padding: 32px 20px 110px; }
+    .page.active { display: block; animation: reveal .25s ease; }
+    @keyframes reveal { from { opacity: 0; transform: translateY(10px); } }
+    .welcome { padding-top: 14vh; text-align: center; }
+    .mark { font-size: 5rem; color: #ff2f8b; }
+    h1 { margin: 12px 0; font-size: clamp(2.2rem, 8vw, 3.2rem); }
+    h2 { margin: 0 0 24px; }
+    .muted { color: #b6aebc; }
+    .glass { margin: 16px 0; padding: 24px; border: 1px solid rgba(255,255,255,.12); border-radius: 22px; background: rgba(255,255,255,.055); box-shadow: 0 18px 60px rgba(0,0,0,.3); }
+    .actions { display: grid; gap: 12px; margin-top: 36px; }
+    .btn { width: 100%; padding: 14px 18px; border: 0; border-radius: 999px; color: #fff; background: linear-gradient(135deg,#ff006e,#ff4da6); font-weight: 750; cursor: pointer; }
+    .btn-outline { border: 2px solid #ff2f8b; color: #ff74b2; background: transparent; }
+    .btn:disabled { cursor: wait; opacity: .6; }
+    .input-group { margin: 0 0 18px; }
+    label { display: block; margin-bottom: 7px; color: #d6cfda; font-size: .88rem; }
+    input, textarea { width: 100%; padding: 13px 14px; border: 1px solid rgba(255,255,255,.14); border-radius: 12px; outline: none; color: #fff; background: rgba(255,255,255,.08); }
+    input:focus, textarea:focus { border-color: #ff2f8b; box-shadow: 0 0 0 3px rgba(255,47,139,.18); }
+    a { color: #ff74b2; }
+    .status { min-height: 1.5rem; margin: 14px 0 0; text-align: center; color: #ffb3d1; }
+    .status.success { color: #8dffb1; }
+    .nav-bottom { position: fixed; inset: auto 0 0; display: none; justify-content: center; gap: 2px; padding: 10px max(12px,env(safe-area-inset-right)) calc(10px + env(safe-area-inset-bottom)); border-top: 1px solid rgba(255,255,255,.1); background: rgba(10,0,21,.94); backdrop-filter: blur(20px); }
+    .nav-item { padding: 9px 14px; border: 0; color: #9b91a3; background: transparent; cursor: pointer; }
+    .nav-item.active { color: #ff4da6; }
+    .profile-photo { display: block; width: 120px; height: 120px; margin: 0 auto 20px; border: 3px solid #ff2f8b; border-radius: 50%; object-fit: cover; }
+    .card-swipe { overflow: hidden; padding: 0; }
+    .card-swipe img { width: 100%; height: 330px; object-fit: cover; background: #191020; }
+    .card-copy { padding: 20px; }
+    .swipe-actions { display: flex; gap: 16px; margin-top: 16px; }
+  </style>
 </head>
 <body>
-    <div class="app-container" id="appContainer">
-        <!-- Welcome Page -->
-        <div class="page active" id="welcomePage">
-            <div style="text-align:center; margin-top:80px;">
-                <i class="fa-solid fa-heart" style="font-size:80px; background: linear-gradient(135deg, #ff006e, #ff4da6); -webkit-background-clip:text; -webkit-text-fill-color:transparent;"></i>
-                <h1 style="font-size:2.5rem; margin:20px 0;">Velvet Connect</h1>
-                <p style="color:#aaa; margin-bottom:40px;">Luxury Dating for Discerning Hearts</p>
-                <div style="display:flex; gap:12px;">
-                    <button class="btn" onclick="navigateTo('signupPage')">Create Account</button>
-                    <button class="btn btn-outline" onclick="navigateTo('loginPage')">Sign In</button>
-                </div>
-            </div>
-        </div>
-        <!-- Sign Up Page -->
-        <div class="page" id="signupPage">
-            <h2>Sign Up</h2>
-            <div class="glass">
-                <div class="input-group"><label>Full Name</label><input type="text" id="signupName"></div>
-                <div class="input-group"><label>Email</label><input type="email" id="signupEmail"></div>
-                <div class="input-group"><label>Password</label><input type="password" id="signupPassword"></div>
-                <button class="btn" onclick="signUp()">Continue</button>
-                <p style="text-align:center; margin-top:16px;"><a href="#" onclick="navigateTo('loginPage')" style="color:#ff006e;">Already have an account? Sign in</a></p>
-            </div>
-        </div>
-        <!-- Login Page -->
-        <div class="page" id="loginPage">
-            <h2>Sign In</h2>
-            <div class="glass">
-                <div class="input-group"><label>Email</label><input type="email" id="loginEmail"></div>
-                <div class="input-group"><label>Password</label><input type="password" id="loginPassword"></div>
-                <button class="btn" onclick="login()">Log In</button>
-            </div>
-        </div>
-        <!-- Verify Email (OTP) Page -->
-        <div class="page" id="verifyPage">
-            <h2>Verify Email</h2>
-            <p style="color:#aaa;">Enter the 6-digit code sent to your email</p>
-            <div class="glass">
-                <div class="input-group"><label>Verification Code</label><input type="text" id="otpInput" maxlength="6" inputmode="numeric"></div>
-                <button class="btn" onclick="verifyOTP()">Verify & Continue</button>
-                <p style="text-align:center; margin-top:12px;"><a href="#" onclick="alert('OTP resent!')" style="color:#ff006e;">Resend Code</a></p>
-            </div>
-        </div>
-        <!-- Profile Setup Page -->
-        <div class="page" id="profileSetupPage">
-            <h2>Build Your Profile</h2>
-            <div class="glass">
-                <div style="text-align:center; margin-bottom:20px;">
-                    <img id="profilePreview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='48' fill='%23222'/%3E%3Ctext x='50' y='65' text-anchor='middle' fill='%23aaa' font-size='40'%3E%3C/text%3E%3C/svg%3E" class="profile-photo" onclick="document.getElementById('photoUpload').click()">
-                    <input type="file" id="photoUpload" accept="image/*" style="display:none" onchange="previewProfilePhoto(event)">
-                </div>
-                <div class="input-group"><label>Bio</label><textarea id="bio" rows="3" placeholder="Describe yourself..."></textarea></div>
-                <div class="input-group"><label>Interests (comma separated)</label><input type="text" id="interests" placeholder="Travel, Music, Art"></div>
-                <button class="btn" onclick="saveProfile()">Save & Continue</button>
-            </div>
-        </div>
-        <!-- Dashboard (Swipe Cards) -->
-        <div class="page" id="dashboardPage">
-            <h2>Discover</h2>
-            <div id="swipeContainer" style="position:relative; min-height:450px;">
-                <div class="card-swipe glass" id="profileCard" style="padding:0;">
-                    <img id="cardPhoto" src="https://picsum.photos/seed/love/400/500" style="width:100%; height:320px; object-fit:cover;">
-                    <div style="padding:20px;">
-                        <h3 id="cardName">Saman</h3>
-                        <p id="cardBio">Love long drives & poetry.</p>
-                        <div id="cardInterests" style="color:#ff006e; margin-top:8px;"></div>
-                    </div>
-                </div>
-                <div style="display:flex; justify-content:center; gap:40px; margin-top:24px;">
-                    <button style="background:none; border:none; font-size:2.5rem; color:#ff4d6d;" onclick="swipeLeft()"><i class="fa-solid fa-xmark"></i></button>
-                    <button style="background:none; border:none; font-size:2.5rem; color:#4dff88;" onclick="swipeRight()"><i class="fa-solid fa-check"></i></button>
-                </div>
-            </div>
-        </div>
-        <!-- Match Page -->
-        <div class="page" id="matchPage">
-            <div class="match-animation">
-                <i class="fa-solid fa-heart-circle-check" style="font-size:6rem; color:#ff006e; animation: pulse 1s infinite;"></i>
-                <h2>It's a Match!</h2>
-                <p>You and <span id="matchName"></span> liked each other</p>
-                <button class="btn" onclick="navigateTo('chatPage')">Send a Message</button>
-                <button class="btn btn-outline" onclick="navigateTo('dashboardPage')">Keep Swiping</button>
-            </div>
-        </div>
-        <!-- Chat Page -->
-        <div class="page" id="chatPage">
-            <h2>Messages</h2>
-            <div class="glass" style="height:300px; overflow-y:auto;" id="chatMessages">
-                <div style="text-align:center; color:#aaa;">Start the conversation!</div>
-            </div>
-            <div style="display:flex; gap:8px; margin-top:12px;">
-                <input type="text" id="chatInput" placeholder="Type a message..." class="input-group input" style="flex:1;">
-                <button class="btn" style="width:auto; padding:14px 20px;" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
-            </div>
-        </div>
-        <!-- Settings Page -->
-        <div class="page" id="settingsPage">
-            <h2>Settings</h2>
-            <div class="glass">
-                <p><a href="#" onclick="logout()" style="color:#ff006e;">Logout</a></p>
-            </div>
-        </div>
-    </div>
-    <!-- Bottom Navigation -->
-    <div class="nav-bottom" id="bottomNav" style="display:none;">
-        <div class="nav-item active" data-page="dashboardPage" onclick="navigateTo('dashboardPage')"><i class="fa-solid fa-compass"></i>Discover</div>
-        <div class="nav-item" data-page="chatPage" onclick="navigateTo('chatPage')"><i class="fa-solid fa-comment"></i>Chats</div>
-        <div class="nav-item" data-page="profileSetupPage" onclick="navigateTo('profileSetupPage')"><i class="fa-solid fa-user"></i>Profile</div>
-        <div class="nav-item" data-page="settingsPage" onclick="navigateTo('settingsPage')"><i class="fa-solid fa-gear"></i>Settings</div>
-    </div>
-
-    <script>
-        // Current user data
-        let currentUser = JSON.parse(localStorage.getItem('velvetUser')) || null;
-        let users = JSON.parse(localStorage.getItem('velvetUsers')) || [
-            { id:1, name:'Saman', email:'demo@test.com', password:'123456', verified:true, bio:'Love long drives & poetry.', interests:'Music,Travel', photo:'https://picsum.photos/seed/saman/400/500' },
-            { id:2, name:'Ayesha', email:'a@b.com', password:'123456', verified:true, bio:'Adventure seeker.', interests:'Hiking,Cooking', photo:'https://picsum.photos/seed/ayesha/400/500' }
-        ];
-        let currentCardIndex = 0;
-        let matches = JSON.parse(localStorage.getItem('velvetMatches')) || [];
-        let chats = JSON.parse(localStorage.getItem('velvetChats')) || {};
-
-        function saveData() {
-            localStorage.setItem('velvetUsers', JSON.stringify(users));
-            localStorage.setItem('velvetMatches', JSON.stringify(matches));
-            localStorage.setItem('velvetChats', JSON.stringify(chats));
-            if(currentUser) localStorage.setItem('velvetUser', JSON.stringify(currentUser));
-        }
-
-        function navigateTo(pageId) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-            // Update bottom nav active
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            const navItem = document.querySelector(`.nav-item[data-page="${pageId}"]`);
-            if(navItem) navItem.classList.add('active');
-            // Show/hide bottom nav based on auth
-            document.getElementById('bottomNav').style.display = currentUser ? 'flex' : 'none';
-            if(pageId === 'dashboardPage') loadProfileCard();
-            if(pageId === 'chatPage') renderChat();
-        }
-
-        // Auth functions
-        function signUp() {
-            const name = document.getElementById('signupName').value.trim();
-            const email = document.getElementById('signupEmail').value.trim();
-            const password = document.getElementById('signupPassword').value;
-            if(!name || !email || !password) return alert('All fields required');
-            if(users.find(u => u.email === email)) return alert('Email already registered');
-            const newUser = { id: users.length+1, name, email, password, verified:false, bio:'', interests:'', photo:'' };
-            users.push(newUser);
-            localStorage.setItem('velvetCurrentId', newUser.id);
-            saveData();
-            alert('Account created! Check email for OTP (use 123456)');
-            navigateTo('verifyPage');
-        }
-
-        function login() {
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
-            const user = users.find(u => u.email === email && u.password === password);
-            if(!user) return alert('Invalid credentials');
-            if(!user.verified) { alert('Please verify email first'); navigateTo('verifyPage'); return; }
-            currentUser = user;
-            saveData();
-            navigateTo('profileSetupPage'); // or dashboard if profile already set
-        }
-
-        function verifyOTP() {
-            const otp = document.getElementById('otpInput').value;
-            if(otp !== '123456') return alert('Invalid code');
-            const id = localStorage.getItem('velvetCurrentId');
-            const user = users.find(u => u.id == id);
-            if(user) { user.verified = true; currentUser = user; saveData(); alert('Verified!'); navigateTo('profileSetupPage'); }
-        }
-
-        function saveProfile() {
-            if(!currentUser) return;
-            currentUser.bio = document.getElementById('bio').value;
-            currentUser.interests = document.getElementById('interests').value;
-            // photo is handled by previewProfilePhoto; store as base64 in user.photo
-            const photoPreview = document.getElementById('profilePreview');
-            if(photoPreview.src && photoPreview.src.startsWith('data:image')) currentUser.photo = photoPreview.src;
-            const idx = users.findIndex(u => u.id === currentUser.id);
-            users[idx] = currentUser;
-            saveData();
-            alert('Profile saved!');
-            navigateTo('dashboardPage');
-        }
-
-        function previewProfilePhoto(event) {
-            const file = event.target.files[0];
-            if(file) {
-                const reader = new FileReader();
-                reader.onload = function(e) { document.getElementById('profilePreview').src = e.target.result; };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        // Swipe function
-        function loadProfileCard() {
-            // Get users except current and already matched
-            const potential = users.filter(u => u.id !== currentUser?.id && !matches.includes(u.id));
-            if(potential.length === 0) {
-                document.getElementById('cardName').innerText = 'No more profiles';
-                return;
-            }
-            const profile = potential[currentCardIndex % potential.length];
-            document.getElementById('cardName').innerText = profile.name;
-            document.getElementById('cardBio').innerText = profile.bio;
-            document.getElementById('cardPhoto').src = profile.photo || 'https://picsum.photos/seed/default/400/500';
-            document.getElementById('cardInterests').innerText = profile.interests;
-        }
-
-        function swipeLeft() { currentCardIndex++; loadProfileCard(); }
-        function swipeRight() {
-            // Get current profile
-            const potential = users.filter(u => u.id !== currentUser.id && !matches.includes(u.id));
-            if(potential.length === 0) return;
-            const profile = potential[currentCardIndex % potential.length];
-            matches.push(profile.id);
-            saveData();
-            // Check if mutual (simulate: if random match)
-            if(Math.random() > 0.5) {
-                document.getElementById('matchName').innerText = profile.name;
-                navigateTo('matchPage');
-            } else {
-                alert('You liked ' + profile.name);
-            }
-            currentCardIndex++;
-            loadProfileCard();
-        }
-
-        // Chat
-        function renderChat() {
-            const chatContainer = document.getElementById('chatMessages');
-            chatContainer.innerHTML = '';
-            const matchId = matches[0]; // simple: first match
-            if(!matchId) { chatContainer.innerHTML = '<div style="text-align:center;color:#aaa;">No messages yet.</div>'; return; }
-            const matchUser = users.find(u => u.id === matchId);
-            const chatKey = `${currentUser.id}_${matchId}`;
-            const msgs = chats[chatKey] || [];
-            msgs.forEach(msg => {
-                const div = document.createElement('div');
-                div.style.textAlign = msg.sender === currentUser.id ? 'right' : 'left';
-                div.style.margin = '8px 0';
-                div.innerHTML = `<span style="background:${msg.sender===currentUser.id?'#ff006e':'#333'}; padding:8px 12px; border-radius:16px; display:inline-block;">${msg.text}</span>`;
-                chatContainer.appendChild(div);
-            });
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
-
-        function sendMessage() {
-            const input = document.getElementById('chatInput');
-            if(!input.value.trim()) return;
-            const matchId = matches[0];
-            if(!matchId) return alert('No match to message');
-            const chatKey = `${currentUser.id}_${matchId}`;
-            if(!chats[chatKey]) chats[chatKey] = [];
-            chats[chatKey].push({ sender: currentUser.id, text: input.value });
-            saveData();
-            input.value = '';
-            renderChat();
-        }
-
-        function logout() {
-            currentUser = null;
-            localStorage.removeItem('velvetUser');
-            navigateTo('welcomePage');
-            document.getElementById('bottomNav').style.display = 'none';
-        }
-
-        // Init on load
-        window.onload = function() {
-            if(currentUser && currentUser.verified) {
-                document.getElementById('bottomNav').style.display = 'flex';
-                navigateTo('dashboardPage');
-            } else {
-                navigateTo('welcomePage');
-            }
-        };
-    </script>
+  <div class="environment-banner">STAGING · SYNTHETIC TEST ACCOUNTS ONLY</div>
+  <main class="app-container" id="appContainer">
+    <section class="page active welcome" id="welcomePage">
+      <div class="mark" aria-hidden="true">♥</div><h1>Velvet Connect</h1><p class="muted">Luxury Dating for Discerning Hearts</p>
+      <div class="actions"><button class="btn" type="button" onclick="navigateTo('signupPage')">Create Account</button><button class="btn btn-outline" type="button" onclick="navigateTo('loginPage')">Sign In</button></div>
+    </section>
+    <section class="page" id="signupPage">
+      <h2>Create a staging account</h2>
+      <form class="glass" id="signupForm">
+        <div class="input-group"><label for="signupName">Display name</label><input id="signupName" minlength="2" maxlength="60" autocomplete="name" required></div>
+        <div class="input-group"><label for="signupEmail">Email</label><input id="signupEmail" type="email" autocomplete="email" required></div>
+        <div class="input-group"><label for="signupPassword">Password</label><input id="signupPassword" type="password" minlength="8" autocomplete="new-password" required></div>
+        <button class="btn" id="signupButton" type="submit">Create Staging Account</button><p class="status" id="signupStatus" role="status" aria-live="polite"></p>
+        <p><a href="#" onclick="navigateTo('loginPage')">Already have an account?</a></p>
+      </form>
+    </section>
+    <section class="page" id="loginPage">
+      <h2>Sign in</h2>
+      <form class="glass" id="loginForm">
+        <div class="input-group"><label for="loginEmail">Email</label><input id="loginEmail" type="email" autocomplete="email" required></div>
+        <div class="input-group"><label for="loginPassword">Password</label><input id="loginPassword" type="password" autocomplete="current-password" required></div>
+        <button class="btn" id="loginButton" type="submit">Log In</button><p class="status" id="loginStatus" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+    <section class="page" id="verifyPage">
+      <h2>Verify your email</h2>
+      <div class="glass"><p class="muted">Open the confirmation link sent by Supabase Auth, then return here to sign in.</p><button class="btn" type="button" onclick="navigateTo('loginPage')">Return to Sign In</button><button class="btn btn-outline" type="button" style="margin-top:12px" onclick="resendConfirmation()">Resend Confirmation</button><p class="status" id="verifyStatus" role="status" aria-live="polite"></p></div>
+    </section>
+    <section class="page" id="profileSetupPage">
+      <h2>Build your profile</h2>
+      <div class="glass">
+        <img id="profilePreview" class="profile-photo" alt="Profile preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Ccircle cx='60' cy='60' r='58' fill='%23221928'/%3E%3C/svg%3E">
+        <div class="input-group"><label for="photoUpload">Local photo preview</label><input id="photoUpload" type="file" accept="image/*" onchange="previewProfilePhoto(event)"></div>
+        <div class="input-group"><label for="bio">Bio</label><textarea id="bio" rows="4" maxlength="800"></textarea></div>
+        <div class="input-group"><label for="interests">Interests (comma separated)</label><input id="interests" maxlength="300" placeholder="Travel, Music, Art"></div>
+        <button class="btn" type="button" onclick="saveProfile()">Save to Staging</button><p class="status" id="profileStatus" role="status" aria-live="polite"></p>
+      </div>
+    </section>
+    <section class="page" id="dashboardPage">
+      <h2>Discover</h2>
+      <div class="glass card-swipe" id="profileCard"><img id="cardPhoto" alt="Profile"><div class="card-copy"><h3 id="cardName">Loading…</h3><p id="cardBio" class="muted"></p><p id="cardInterests"></p></div></div>
+      <div class="swipe-actions"><button class="btn btn-outline" type="button" onclick="swipeLeft()">Pass</button><button class="btn" type="button" onclick="swipeRight()">Like</button></div><p class="status" id="discoverStatus" role="status" aria-live="polite"></p>
+    </section>
+    <section class="page" id="matchPage"><div class="glass"><h2>It’s a match</h2><p id="matchName"></p><button class="btn" type="button" onclick="navigateTo('chatPage')">Open Messages</button></div></section>
+    <section class="page" id="chatPage"><h2>Messages</h2><div class="glass" id="chatMessages"><p class="muted">Live messaging becomes available after a verified mutual match.</p></div><div class="input-group"><label for="chatInput">Message</label><input id="chatInput" maxlength="2000"></div><button class="btn" type="button" onclick="sendMessage()">Send</button></section>
+    <section class="page" id="settingsPage"><h2>Settings</h2><div class="glass"><button class="btn btn-outline" type="button" onclick="logout()">Sign Out</button></div></section>
+  </main>
+  <nav class="nav-bottom" id="bottomNav" aria-label="Primary"><button class="nav-item active" data-page="dashboardPage" onclick="navigateTo('dashboardPage')">Discover</button><button class="nav-item" data-page="chatPage" onclick="navigateTo('chatPage')">Chats</button><button class="nav-item" data-page="profileSetupPage" onclick="navigateTo('profileSetupPage')">Profile</button><button class="nav-item" data-page="settingsPage" onclick="navigateTo('settingsPage')">Settings</button></nav>
+  <script type="module" src="./src/app.ts"></script>
 </body>
 </html>
-
