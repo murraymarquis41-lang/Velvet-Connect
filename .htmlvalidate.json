@@ -1,0 +1,10 @@
+{
+  "extends": [],
+  "rules": {
+    "attr-quotes": "error",
+    "close-order": "error",
+    "doctype-html": "error",
+    "element-name": "error",
+    "no-dup-id": "error"
+  }
+}

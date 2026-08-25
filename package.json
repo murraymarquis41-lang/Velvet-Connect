@@ -1,0 +1,28 @@
+{
+  "name": "velvet-connect-static-prototype",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "npm@11.9.0",
+  "engines": {
+    "node": ">=22 <25"
+  },
+  "scripts": {
+    "dev": "vite",
+    "preview": "vite preview",
+    "lint": "eslint . && html-validate index.html",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@types/node": "^26.3.0",
+    "eslint": "^9.39.5",
+    "html-validate": "^11.10.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.68.0",
+    "vite": "^6.3.5",
+    "vitest": "^4.1.11"
+  }
+}
