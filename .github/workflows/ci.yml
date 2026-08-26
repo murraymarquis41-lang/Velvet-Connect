@@ -18,6 +18,11 @@ jobs:
     name: Install, lint, typecheck, test, build
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      VITE_APP_ENV: staging
+      VITE_ENABLE_ENROLLMENT: "false"
+      VITE_SUPABASE_URL: https://qqintbwoalvoegvqoxlo.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_HuzOX6mv9QBruN_8Ct3n6Q_CFNrt4pe
     steps:
       - name: Check out source
         uses: actions/checkout@v4

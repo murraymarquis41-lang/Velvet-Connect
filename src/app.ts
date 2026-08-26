@@ -1,7 +1,13 @@
 import { createClient, type User } from "@supabase/supabase-js";
 
-const SUPABASE_URL = "https://qqintbwoalvoegvqoxlo.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_HuzOX6mv9QBruN_8Ct3n6Q_CFNrt4pe";
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+const APP_ENV = import.meta.env.VITE_APP_ENV === "production" ? "production" : "staging";
+const ENROLLMENT_ENABLED = import.meta.env.VITE_ENABLE_ENROLLMENT === "true";
+
+if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+  throw new Error("Missing required Supabase public environment configuration.");
+}
 const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 
 type Profile = {
@@ -31,6 +37,28 @@ function setStatus(id: string, message: string, success = false): void {
   target.classList.toggle("success", success);
 }
 
+function applyEnvironment(): void {
+  const production = APP_ENV === "production";
+  const banner = element<HTMLElement>("environmentBanner");
+  const signupEntry = element<HTMLButtonElement>("signupEntryButton");
+  const signupButton = element<HTMLButtonElement>("signupButton");
+
+  banner.textContent = production
+    ? ENROLLMENT_ENABLED
+      ? "VELVET CONNECT · PRODUCTION"
+      : "PRODUCTION VERIFICATION · ENROLLMENT PAUSED"
+    : "STAGING · SYNTHETIC TEST ACCOUNTS ONLY";
+  element<HTMLElement>("signupHeading").textContent = production ? "Create your account" : "Create a staging account";
+  signupButton.textContent = production ? "Create Account" : "Create Staging Account";
+
+  signupEntry.disabled = !ENROLLMENT_ENABLED;
+  signupButton.disabled = !ENROLLMENT_ENABLED;
+  if (!ENROLLMENT_ENABLED) {
+    signupEntry.title = "Enrollment remains paused pending release-gate verification.";
+    setStatus("signupStatus", "Enrollment remains paused pending release-gate verification.");
+  }
+}
+
 function authRedirectUrl(): string {
   return `${window.location.origin}${window.location.pathname}`;
 }
@@ -38,7 +66,7 @@ function authRedirectUrl(): string {
 function navigateTo(pageId: string): void {
   if (protectedPages.has(pageId) && !currentUser) {
     pageId = "loginPage";
-    setStatus("loginStatus", "Sign in to access this staging feature.");
+    setStatus("loginStatus", productionCopy("Sign in to access Velvet Connect.", "Sign in to access this staging feature."));
   }
 
   document.querySelectorAll<HTMLElement>(".page").forEach((page) => page.classList.remove("active"));
@@ -60,7 +88,7 @@ async function ensureProfile(user: User): Promise<Profile> {
   if (existing) return existing;
 
   const metadataName = typeof user.user_metadata.display_name === "string" ? user.user_metadata.display_name.trim() : "";
-  const displayName = (metadataName || user.email?.split("@")[0] || "Staging member").slice(0, 60);
+  const displayName = (metadataName || user.email?.split("@")[0] || productionCopy("Velvet member", "Staging member")).slice(0, 60);
   const { data, error } = await supabase
     .from("profiles")
     .insert({ id: user.id, display_name: displayName })
@@ -81,6 +109,10 @@ async function loadOwnProfile(): Promise<Profile> {
 
 async function signUp(event: SubmitEvent): Promise<void> {
   event.preventDefault();
+  if (!ENROLLMENT_ENABLED) {
+    setStatus("signupStatus", "Enrollment remains paused pending release-gate verification.");
+    return;
+  }
   const button = element<HTMLButtonElement>("signupButton");
   const displayName = element<HTMLInputElement>("signupName").value.trim();
   const email = element<HTMLInputElement>("signupEmail").value.trim();
@@ -104,7 +136,7 @@ async function signUp(event: SubmitEvent): Promise<void> {
       return;
     }
     navigateTo("verifyPage");
-    setStatus("verifyStatus", "Confirmation sent. Check the synthetic test inbox.", true);
+    setStatus("verifyStatus", productionCopy("Confirmation sent. Check your inbox.", "Confirmation sent. Check the synthetic test inbox."), true);
   } catch (error) {
     setStatus("signupStatus", error instanceof Error ? error.message : "Unable to create account.");
   } finally {
@@ -137,7 +169,7 @@ async function login(event: SubmitEvent): Promise<void> {
 async function resendConfirmation(): Promise<void> {
   const email = sessionStorage.getItem("velvetPendingEmail");
   if (!email) {
-    setStatus("verifyStatus", "Return to account creation and enter the staging email again.");
+    setStatus("verifyStatus", productionCopy("Return to account creation and enter your email again.", "Return to account creation and enter the staging email again."));
     return;
   }
   const { error } = await supabase.auth.resend({ type: "signup", email, options: { emailRedirectTo: authRedirectUrl() } });
@@ -147,12 +179,12 @@ async function resendConfirmation(): Promise<void> {
 async function saveProfile(): Promise<void> {
   if (!currentUser) return navigateTo("loginPage");
   setStatus("profileStatus", "Saving…");
-  const interests = element<HTMLInputElement>("interests").value.split(",").map((item) => item.trim()).filter(Boolean).slice(0, 20);
+  const interests = element<HTMLInputElement>("interests").value.split(",").map((item) => item.trim()).filter(Boolean).slice(0, 12);
   const { error } = await supabase
     .from("profiles")
     .update({ bio: element<HTMLTextAreaElement>("bio").value.trim() || null, interests, onboarding_completed: true })
     .eq("id", currentUser.id);
-  setStatus("profileStatus", error ? error.message : "Profile saved to Velvet Connect Staging.", !error);
+  setStatus("profileStatus", error ? error.message : productionCopy("Profile saved to Velvet Connect.", "Profile saved to Velvet Connect Staging."), !error);
   if (!error) window.setTimeout(() => navigateTo("dashboardPage"), 500);
 }
 
@@ -164,14 +196,14 @@ function previewProfilePhoto(event: Event): void {
     if (typeof reader.result === "string") element<HTMLImageElement>("profilePreview").src = reader.result;
   });
   reader.readAsDataURL(file);
-  setStatus("profileStatus", "Photo preview is local only; Storage upload is not enabled in this release slice.");
+  setStatus("profileStatus", productionCopy("Photo preview is local only; upload is not enabled in this release slice.", "Photo preview is local only; Storage upload is not enabled in this release slice."));
 }
 
 function renderCurrentCard(): void {
   const profile = discoverableProfiles[currentCardIndex];
   if (!profile) {
     element<HTMLElement>("cardName").textContent = "No eligible profiles";
-    element<HTMLElement>("cardBio").textContent = "Discovery is restricted to verified, onboarding-complete, unblocked synthetic accounts.";
+    element<HTMLElement>("cardBio").textContent = productionCopy("Discovery is restricted to eligible, onboarding-complete, unblocked accounts.", "Discovery is restricted to verified, onboarding-complete, unblocked synthetic accounts.");
     element<HTMLElement>("cardInterests").textContent = "";
     element<HTMLImageElement>("cardPhoto").removeAttribute("src");
     return;
@@ -184,7 +216,7 @@ function renderCurrentCard(): void {
 
 async function loadProfileCard(): Promise<void> {
   if (!currentUser) return;
-  setStatus("discoverStatus", "Loading eligible staging profiles…");
+  setStatus("discoverStatus", productionCopy("Loading eligible profiles…", "Loading eligible staging profiles…"));
   const { data, error } = await supabase.from("profiles").select("id,display_name,bio,interests,avatar_url,onboarding_completed").neq("id", currentUser.id).limit(20);
   if (error) {
     setStatus("discoverStatus", error.message);
@@ -251,6 +283,7 @@ async function logout(): Promise<void> {
 }
 
 async function initialize(): Promise<void> {
+  applyEnvironment();
   element<HTMLFormElement>("signupForm").addEventListener("submit", (event) => void signUp(event as SubmitEvent));
   element<HTMLFormElement>("loginForm").addEventListener("submit", (event) => void login(event as SubmitEvent));
   const { data } = await supabase.auth.getUser();
@@ -263,6 +296,10 @@ async function initialize(): Promise<void> {
     navigateTo("profileSetupPage");
     setStatus("profileStatus", error instanceof Error ? error.message : "Unable to load profile.");
   }
+}
+
+function productionCopy(productionText: string, stagingText: string): string {
+  return APP_ENV === "production" ? productionText : stagingText;
 }
 
 Object.assign(window, { navigateTo, resendConfirmation, saveProfile, previewProfilePhoto, swipeLeft, swipeRight, sendMessage, logout });

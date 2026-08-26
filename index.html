@@ -42,19 +42,19 @@
   </style>
 </head>
 <body>
-  <div class="environment-banner">STAGING · SYNTHETIC TEST ACCOUNTS ONLY</div>
+  <div class="environment-banner" id="environmentBanner">ENVIRONMENT CHECK</div>
   <main class="app-container" id="appContainer">
     <section class="page active welcome" id="welcomePage">
       <div class="mark" aria-hidden="true">♥</div><h1>Velvet Connect</h1><p class="muted">Luxury Dating for Discerning Hearts</p>
-      <div class="actions"><button class="btn" type="button" onclick="navigateTo('signupPage')">Create Account</button><button class="btn btn-outline" type="button" onclick="navigateTo('loginPage')">Sign In</button></div>
+      <div class="actions"><button class="btn" id="signupEntryButton" type="button" onclick="navigateTo('signupPage')">Create Account</button><button class="btn btn-outline" type="button" onclick="navigateTo('loginPage')">Sign In</button></div>
     </section>
     <section class="page" id="signupPage">
-      <h2>Create a staging account</h2>
+      <h2 id="signupHeading">Create an account</h2>
       <form class="glass" id="signupForm">
         <div class="input-group"><label for="signupName">Display name</label><input id="signupName" minlength="2" maxlength="60" autocomplete="name" required></div>
         <div class="input-group"><label for="signupEmail">Email</label><input id="signupEmail" type="email" autocomplete="email" required></div>
         <div class="input-group"><label for="signupPassword">Password</label><input id="signupPassword" type="password" minlength="8" autocomplete="new-password" required></div>
-        <button class="btn" id="signupButton" type="submit">Create Staging Account</button><p class="status" id="signupStatus" role="status" aria-live="polite"></p>
+        <button class="btn" id="signupButton" type="submit">Create Account</button><p class="status" id="signupStatus" role="status" aria-live="polite"></p>
         <p><a href="#" onclick="navigateTo('loginPage')">Already have an account?</a></p>
       </form>
     </section>
@@ -75,7 +75,7 @@
       <div class="glass">
         <img id="profilePreview" class="profile-photo" alt="Profile preview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Ccircle cx='60' cy='60' r='58' fill='%23221928'/%3E%3C/svg%3E">
         <div class="input-group"><label for="photoUpload">Local photo preview</label><input id="photoUpload" type="file" accept="image/*" onchange="previewProfilePhoto(event)"></div>
-        <div class="input-group"><label for="bio">Bio</label><textarea id="bio" rows="4" maxlength="800"></textarea></div>
+        <div class="input-group"><label for="bio">Bio</label><textarea id="bio" rows="4" maxlength="500"></textarea></div>
         <div class="input-group"><label for="interests">Interests (comma separated)</label><input id="interests" maxlength="300" placeholder="Travel, Music, Art"></div>
         <button class="btn" type="button" onclick="saveProfile()">Save to Staging</button><p class="status" id="profileStatus" role="status" aria-live="polite"></p>
       </div>
