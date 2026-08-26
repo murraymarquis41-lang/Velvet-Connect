@@ -64,3 +64,5 @@ jobs:
           test "$STATUS" = "200"
           test "$(tr -d '[:space:]' < /tmp/profiles.json)" = "[]"
           echo "RLS smoke verified: anonymous profile query returned no rows."
+
+# Verification workflow intentionally retained as a release gate.
