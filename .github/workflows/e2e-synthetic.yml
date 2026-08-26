@@ -1,0 +1,45 @@
+name: Authenticated synthetic E2E release gate
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-e2e:
+    runs-on: ubuntu-24.04
+    env:
+      SUPABASE_URL: https://qqintbwoalvoegvqoxlo.supabase.co
+      SUPABASE_PUBLISHABLE_KEY: sb_publishable_HuzOX6mv9QBruN_8Ct3n6Q_CFNrt4pe
+      SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - name: Check out exact source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Require encrypted staging admin credential
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${SUPABASE_SERVICE_ROLE_KEY:-}" ]; then
+            echo "SUPABASE_SERVICE_ROLE_KEY is not configured in GitHub Actions secrets." >&2
+            echo "This release gate will not weaken RLS or store a service-role key in the repository." >&2
+            exit 1
+          fi
+
+      - name: Clean dependency installation
+        run: npm ci
+
+      - name: Dependency audit
+        run: npm audit --audit-level=high
+
+      - name: Run full authenticated synthetic journey
+        run: node scripts/e2e-live.mjs
