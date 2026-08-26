@@ -1,23 +1,66 @@
-# VELVET Connect Build Baseline
+# VELVET Connect Authoritative Build Baseline
 
-Status recorded: 2026-08-25 UTC
+Status recorded: 2026-08-26
 
-## Owner-controlled repository
+## Source of truth
+
+The owner-controlled GitHub repository is now the authoritative source location for Velvet Connect engineering work:
 
 - Repository: `murraymarquis41-lang/Velvet-Connect`
-- Base branch: `main`
-- Base commit inspected: `388f9ba8a94358478cf17385877531e8273a37e8`
-- Implemented prototype at that commit: one static HTML file named `Velvet connect` (blob `261b05744333554179e460f4c8e3bcfa47930cf3`).
-- No package manifest, source directory, Build 02 branch, or Build 03 branch existed at the inspected commit.
+- Authoritative branch: `main`
+- Repository owner has confirmed GitHub `push` and `admin` permission.
+- Current application baseline inherited from merged commit: `eec33672586a916e2be93958f0aa5cb7cbc89278` (`WP-01C: add Supabase staging authentication and backend flows (#5)`).
+- Supabase repository configuration added on 2026-08-26 in commit `d55d6b66bfd923c4bc40de958b332499f7cc260e`.
 
-This correction preserves the static prototype content as `index.html` so it can be built and tested reproducibly. It does not claim that planned SwiftUI, Supabase, matching, messaging, or moderation systems are implemented.
+Scattered ZIP/build artifacts are reference/archive material only unless their contents are deliberately reconciled into this repository and committed to `main` (or merged through an approved pull request).
 
-## Other artifacts reviewed
+## Current MVP identity
 
-- `FreyjaNellora/Velvet-Connect` refers to the static `Velvet connect` file as the Build 02 artifact in its preliminary QSC review. That label is external review terminology; the owner-controlled source itself has no build manifest proving Build 02 identity.
-- The supplied archive `01-VELVET-Connect-Build-01.zip`, SHA-256 `52e855c73baa2f73ac09bcb0bc7f6483b339c0b5a4c9e61bd0bc9ee2ef0e6b2a`, explicitly displays `Product prototype • Build 01`. It was not imported, relabeled, modified, or certified by this correction.
-- No authoritative Build 03 source was available in the owner repository or supplied workspace.
+The current repository implementation is the Build 03 / staging-MVP line, not a certified Build 04 baseline.
 
-## WP-01B scope
+The committed source presently includes:
 
-WP-01B adds reproducible npm installation, linting, TypeScript validation of engineering tooling/tests, automated prototype smoke testing, a Vite production build, and CI enforcement around the currently owner-controlled static prototype. A future Build 02/03 source handoff must carry its own explicit build manifest and pass these gates independently before replacing this baseline.
+- reproducible npm project metadata and `package-lock.json`
+- Vite build configuration
+- ESLint, TypeScript, Vitest, and CI quality-gate tooling
+- GitHub Pages deployment workflow
+- browser application source in `src/app.ts`
+- Supabase client integration for staging authentication
+- profile creation and persistence
+- discovery and likes/swipes flows
+- match and chat-facing application flows
+- Supabase migration material under `supabase/migrations/`
+- Supabase CLI/project configuration under `supabase/config.toml`
+
+The Build 01 archive remains historical and must not replace or redefine this baseline.
+
+## Supabase project identity
+
+- Staging project reference: `qqintbwoalvoegvqoxlo`
+- Public staging URL used by the committed client: `https://qqintbwoalvoegvqoxlo.supabase.co`
+- Client uses a Supabase publishable key only; service-role/admin secrets must never be committed.
+- Repository configuration: `supabase/config.toml`
+
+## Migration completeness warning
+
+GitHub now contains the currently supplied migration file:
+
+- `supabase/migrations/20260825000100_enable_staging_profile_onboarding.sql`
+
+That migration is a follow-up authorization/onboarding migration. By itself it does **not** define the foundational `profiles`, `swipes`, `matches`, or messaging schema from an empty database. Therefore the repository is the authoritative source for the code that is currently available, but the database baseline is not yet fully reconstructable from GitHub alone until the foundational Supabase schema migration(s) are recovered or exported and committed.
+
+No engineer should claim a clean-database rebuild is reproducible until that foundational migration set exists in this repository and is tested.
+
+## Build 04 status
+
+No repository evidence inspected on 2026-08-26 establishes a distinct completed Build 04 source baseline. Build 04 must receive its own commit/merge identity and pass the required engineering, staging, and release gates before this document is updated to designate it authoritative.
+
+## Baseline rule going forward
+
+1. All application source changes must be committed to this repository.
+2. `package-lock.json` must change in the same reviewed change whenever npm dependency resolution changes.
+3. Every Supabase schema/RLS/function change must be represented by a committed migration.
+4. Supabase configuration must remain committed without secrets.
+5. CI must pass the repository's required engineering gates before a new build is declared authoritative.
+6. Build labels (Build 03, Build 04, etc.) must map to a specific Git commit or release/tag, not a loose ZIP filename.
+7. External build archives are historical evidence or handoff artifacts; they are not the source of truth.
