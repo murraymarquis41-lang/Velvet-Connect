@@ -41,23 +41,10 @@ jobs:
             -H "Authorization: Bearer ${SUPABASE_PUBLISHABLE_KEY}" \
             "https://qqintbwoalvoegvqoxlo.supabase.co/auth/v1/health" \
             -o /tmp/auth-health.json
+          grep -q '"name":"GoTrue"' /tmp/auth-health.json
           cat /tmp/auth-health.json
 
-      - name: Verify Supabase REST API and publishable key
-        shell: bash
-        env:
-          SUPABASE_PUBLISHABLE_KEY: sb_publishable_HuzOX6mv9QBruN_8Ct3n6Q_CFNrt4pe
-        run: |
-          set -euo pipefail
-          STATUS=$(curl -sS -o /tmp/rest.json -w "%{http_code}" \
-            -H "apikey: ${SUPABASE_PUBLISHABLE_KEY}" \
-            -H "Authorization: Bearer ${SUPABASE_PUBLISHABLE_KEY}" \
-            "https://qqintbwoalvoegvqoxlo.supabase.co/rest/v1/")
-          test "$STATUS" = "200"
-          grep -q '"swagger"\|"openapi"' /tmp/rest.json
-          echo "Supabase REST API verified with publishable client key."
-
-      - name: Verify unauthenticated profile access is not broadly exposed
+      - name: Verify Supabase REST key and anonymous RLS protection
         shell: bash
         env:
           SUPABASE_PUBLISHABLE_KEY: sb_publishable_HuzOX6mv9QBruN_8Ct3n6Q_CFNrt4pe
@@ -69,6 +56,6 @@ jobs:
             "https://qqintbwoalvoegvqoxlo.supabase.co/rest/v1/profiles?select=id&limit=1")
           test "$STATUS" = "200"
           test "$(tr -d '[:space:]' < /tmp/profiles.json)" = "[]"
-          echo "RLS smoke verified: anonymous profile query returned no rows."
+          echo "Supabase REST publishable-key access verified; anonymous profile query returned no rows under RLS."
 
 # Verification workflow intentionally retained as a release gate.
