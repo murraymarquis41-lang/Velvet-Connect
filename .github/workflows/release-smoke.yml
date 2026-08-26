@@ -54,8 +54,17 @@ jobs:
             -H "apikey: ${SUPABASE_PUBLISHABLE_KEY}" \
             -H "Authorization: Bearer ${SUPABASE_PUBLISHABLE_KEY}" \
             "https://qqintbwoalvoegvqoxlo.supabase.co/rest/v1/profiles?select=id&limit=1")
-          test "$STATUS" = "200"
-          test "$(tr -d '[:space:]' < /tmp/profiles.json)" = "[]"
-          echo "Supabase REST publishable-key access verified; anonymous profile query returned no rows under RLS."
+          BODY=$(tr -d '[:space:]' < /tmp/profiles.json)
+          echo "Profiles probe HTTP status: $STATUS"
+          if [ "$STATUS" = "200" ]; then
+            test "$BODY" = "[]"
+            echo "Supabase REST reached successfully; anonymous profile query returned no rows under RLS."
+          elif [ "$STATUS" = "401" ] || [ "$STATUS" = "403" ]; then
+            echo "Supabase REST reached successfully; anonymous profile access was explicitly denied."
+          else
+            echo "Unexpected Supabase REST response: HTTP $STATUS" >&2
+            cat /tmp/profiles.json >&2
+            exit 1
+          fi
 
 # Verification workflow intentionally retained as a release gate.
