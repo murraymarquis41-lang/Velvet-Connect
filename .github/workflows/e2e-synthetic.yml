@@ -43,3 +43,5 @@ jobs:
 
       - name: Run full authenticated synthetic journey
         run: node scripts/e2e-live.mjs
+
+# Release gate intentionally runs only with an encrypted staging service-role secret.
