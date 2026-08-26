@@ -32,9 +32,15 @@ jobs:
 
       - name: Verify Supabase Auth service health
         shell: bash
+        env:
+          SUPABASE_PUBLISHABLE_KEY: sb_publishable_HuzOX6mv9QBruN_8Ct3n6Q_CFNrt4pe
         run: |
           set -euo pipefail
-          curl -fsS "https://qqintbwoalvoegvqoxlo.supabase.co/auth/v1/health" -o /tmp/auth-health.json
+          curl -fsS \
+            -H "apikey: ${SUPABASE_PUBLISHABLE_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_PUBLISHABLE_KEY}" \
+            "https://qqintbwoalvoegvqoxlo.supabase.co/auth/v1/health" \
+            -o /tmp/auth-health.json
           cat /tmp/auth-health.json
 
       - name: Verify Supabase REST API and publishable key
