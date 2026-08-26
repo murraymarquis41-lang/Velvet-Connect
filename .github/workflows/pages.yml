@@ -1,4 +1,4 @@
-name: Deploy static prototype to GitHub Pages
+name: Deploy production verification build to GitHub Pages
 
 on:
   push:
@@ -16,9 +16,14 @@ concurrency:
 
 jobs:
   verify-and-build:
-    name: Verify and build static prototype
+    name: Verify and build production configuration
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      VITE_APP_ENV: production
+      VITE_ENABLE_ENROLLMENT: "false"
+      VITE_SUPABASE_URL: https://rrtxdzwfudlqbcticmlp.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_sknzlD0MStONUuCDRSl_gg_f1oS_T5M
     steps:
       - name: Check out source
         uses: actions/checkout@v4

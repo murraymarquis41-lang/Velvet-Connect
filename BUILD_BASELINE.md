@@ -41,13 +41,21 @@ The Build 01 archive remains historical and must not replace or redefine this ba
 - Client uses a Supabase publishable key only; service-role/admin secrets must never be committed.
 - Repository configuration: `supabase/config.toml`
 
+## Production verification identity
+
+- Production project reference: `rrtxdzwfudlqbcticmlp`
+- Production public API URL: `https://rrtxdzwfudlqbcticmlp.supabase.co`
+- GitHub Pages production builds receive the production URL and publishable key through explicit Vite build variables.
+- Public enrollment remains fail-closed through `VITE_ENABLE_ENROLLMENT=false` until the remaining release gates are verified. The production verification build may identify the production environment and allow existing authorized users to sign in, but it must not open new-user enrollment while the gate is false.
+- Staging and production project identities must never be hard-coded interchangeably in browser source.
+
 ## Migration completeness warning
 
 GitHub now contains the currently supplied migration file:
 
 - `supabase/migrations/20260825000100_enable_staging_profile_onboarding.sql`
 
-That migration is a follow-up authorization/onboarding migration. By itself it does **not** define the foundational `profiles`, `swipes`, `matches`, or messaging schema from an empty database. Therefore the repository is the authoritative source for the code that is currently available, but the database baseline is not yet fully reconstructable from GitHub alone until the foundational Supabase schema migration(s) are recovered or exported and committed.
+That migration is a follow-up authorization/onboarding migration. By itself it does **not** define the foundational `profiles`, `swipes`, `matches`, or messaging schema from an empty database. Therefore the repository is the authoritative source for the code that is currently available, but the database baseline is not yet fully reconstructable from GitHub alone until the foundational migration set exists in this repository and is tested.
 
 No engineer should claim a clean-database rebuild is reproducible until that foundational migration set exists in this repository and is tested.
 

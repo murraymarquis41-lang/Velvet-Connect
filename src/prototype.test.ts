@@ -22,11 +22,12 @@ describe("authoritative static prototype", () => {
     }
 
     expect(html).toContain('src="./src/app.ts"');
-    expect(html).toContain("STAGING · SYNTHETIC TEST ACCOUNTS ONLY");
+    expect(html).toContain('id="environmentBanner"');
+    expect(html).toContain('id="signupEntryButton"');
     expect(html).not.toContain("password:'123456'");
   });
 
-  it("uses live staging authentication without local credential storage", async () => {
+  it("uses environment-scoped live authentication without local credential storage", async () => {
     const app = await readFile(new URL("./app.ts", import.meta.url), "utf8");
 
     expect(app).toContain("supabase.auth.signUp");
@@ -35,5 +36,9 @@ describe("authoritative static prototype", () => {
     expect(app).not.toContain("localStorage");
     expect(app).not.toContain("service_role");
     expect(app).not.toContain("sb_secret_");
+    expect(app).toContain("VITE_SUPABASE_URL");
+    expect(app).toContain("VITE_SUPABASE_PUBLISHABLE_KEY");
+    expect(app).toContain("VITE_ENABLE_ENROLLMENT");
+    expect(app).not.toContain("https://qqintbwoalvoegvqoxlo.supabase.co");
   });
 });
