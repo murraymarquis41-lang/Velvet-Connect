@@ -26,18 +26,39 @@ const clientB = createClient(SUPABASE_URL, PUBLISHABLE_KEY, {
 });
 
 const createdUserIds = [];
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+async function publicSignupWithThrottleRetry(client, email, displayName) {
+  const waitsMs = [45_000, 90_000, 180_000];
+
+  for (let attempt = 0; attempt <= waitsMs.length; attempt += 1) {
+    const result = await client.auth.signUp({
+      email,
+      password,
+      options: { data: { display_name: displayName, synthetic_e2e: true } },
+    });
+
+    if (!result.error) return result.data;
+
+    const throttled = /rate limit/i.test(result.error.message || "");
+    if (!throttled || attempt === waitsMs.length) {
+      throw new Error(`signup failed for ${displayName}: ${result.error.message}`);
+    }
+
+    const waitMs = waitsMs[attempt];
+    console.log(`Public signup throttled for ${displayName}; retrying in ${waitMs / 1000}s (attempt ${attempt + 2}/${waitsMs.length + 1}).`);
+    await sleep(waitMs);
+  }
+
+  throw new Error(`signup retry loop exhausted for ${displayName}`);
+}
+
 async function signUpSynthetic(client, email, displayName) {
-  const { data, error } = await client.auth.signUp({
-    email,
-    password,
-    options: { data: { display_name: displayName, synthetic_e2e: true } },
-  });
-  if (error) throw new Error(`signup failed for ${displayName}: ${error.message}`);
+  const data = await publicSignupWithThrottleRetry(client, email, displayName);
   assert(data.user?.id, `signup did not return a user for ${displayName}`);
   createdUserIds.push(data.user.id);
 
