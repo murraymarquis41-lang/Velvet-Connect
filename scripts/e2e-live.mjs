@@ -10,8 +10,9 @@ if (!SERVICE_ROLE_KEY) {
 
 const stamp = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 const password = `VcE2E-${stamp}-A9!`;
-const emailA = `velvet-e2e-${stamp}-a@example.com`;
-const emailB = `velvet-e2e-${stamp}-b@example.com`;
+const syntheticDomain = "qqintbwoalvoegvqoxlo.supabase.co";
+const emailA = `velvet-e2e-${stamp}-a@${syntheticDomain}`;
+const emailB = `velvet-e2e-${stamp}-b@${syntheticDomain}`;
 
 const admin = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   auth: { autoRefreshToken: false, persistSession: false },
