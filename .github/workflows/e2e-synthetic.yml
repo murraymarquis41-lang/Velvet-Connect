@@ -45,4 +45,4 @@ jobs:
         run: node scripts/e2e-live.mjs
 
 # Release gate intentionally runs only with an encrypted staging service-role secret.
-# Rerun marker: 2026-08-26 configured secret verification.
+# Rerun marker: 2026-08-26 updated service-role verification.
