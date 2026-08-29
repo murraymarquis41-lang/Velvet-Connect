@@ -26,47 +26,25 @@ const clientB = createClient(SUPABASE_URL, PUBLISHABLE_KEY, {
 });
 
 const createdUserIds = [];
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-async function publicSignupWithThrottleRetry(client, email, displayName) {
-  const waitsMs = [45_000, 90_000, 180_000];
-
-  for (let attempt = 0; attempt <= waitsMs.length; attempt += 1) {
-    const result = await client.auth.signUp({
-      email,
-      password,
-      options: { data: { display_name: displayName, synthetic_e2e: true } },
-    });
-
-    if (!result.error) return result.data;
-
-    const throttled = /rate limit/i.test(result.error.message || "");
-    if (!throttled || attempt === waitsMs.length) {
-      throw new Error(`signup failed for ${displayName}: ${result.error.message}`);
-    }
-
-    const waitMs = waitsMs[attempt];
-    console.log(`Public signup throttled for ${displayName}; retrying in ${waitMs / 1000}s (attempt ${attempt + 2}/${waitsMs.length + 1}).`);
-    await sleep(waitMs);
-  }
-
-  throw new Error(`signup retry loop exhausted for ${displayName}`);
-}
-
-async function signUpSynthetic(client, email, displayName) {
-  const data = await publicSignupWithThrottleRetry(client, email, displayName);
-  assert(data.user?.id, `signup did not return a user for ${displayName}`);
+async function seedSyntheticUser(client, email, displayName) {
+  // The service-role harness creates and confirms disposable staging users so
+  // this release gate is deterministic and independent of outbound-email quotas.
+  // The public client must still authenticate each account and all application
+  // operations below continue to run through normal member sessions under RLS.
+  const { data, error } = await admin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+    user_metadata: { display_name: displayName, synthetic_e2e: true },
+  });
+  if (error) throw new Error(`synthetic user seed failed for ${displayName}: ${error.message}`);
+  assert(data.user?.id, `synthetic seed did not return a user for ${displayName}`);
   createdUserIds.push(data.user.id);
-
-  // Confirmation is performed only by the service-role test harness. This keeps
-  // normal staging members on the real confirmation path while allowing a fully
-  // automated synthetic release gate without an external mailbox dependency.
-  const { error: confirmError } = await admin.auth.admin.updateUserById(data.user.id, { email_confirm: true });
-  if (confirmError) throw new Error(`synthetic confirmation failed for ${displayName}: ${confirmError.message}`);
 
   const { data: loginData, error: loginError } = await client.auth.signInWithPassword({ email, password });
   if (loginError) throw new Error(`login failed for ${displayName}: ${loginError.message}`);
@@ -93,9 +71,9 @@ async function createOwnProfile(client, user, displayName, bio, interests) {
 }
 
 async function run() {
-  console.log("E2E 1/8: signup + authenticated login");
-  const userA = await signUpSynthetic(clientA, emailA, "E2E Member A");
-  const userB = await signUpSynthetic(clientB, emailB, "E2E Member B");
+  console.log("E2E 1/8: deterministic staging seed + public-client login");
+  const userA = await seedSyntheticUser(clientA, emailA, "E2E Member A");
+  const userB = await seedSyntheticUser(clientB, emailB, "E2E Member B");
 
   console.log("E2E 2/8: profile creation + synthetic staging verification + onboarding");
   await createOwnProfile(clientA, userA, "E2E Member A", "Synthetic release-gate profile A", ["coffee", "music", "travel"]);

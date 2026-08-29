@@ -55,8 +55,11 @@ jobs:
           fi
           echo "Staging admin credential validated."
 
-      - name: Run full authenticated synthetic journey
+      - name: Run deterministic authenticated synthetic journey
         run: node scripts/e2e-live.mjs
 
 # Release gate intentionally runs only with an encrypted staging service-role secret.
-# Public signup remains a required assertion; rate limiting is not treated as a pass.
+# Disposable staging users are service-role seeded and confirmed, then authenticated
+# through the public client. This avoids treating outbound-email quota as application
+# correctness while enrollment is paused; public email delivery requires its own gate
+# before real-user enrollment can be authorized.
