@@ -1,6 +1,6 @@
 # VELVET Connect Authoritative Build Baseline
 
-Status recorded: 2026-08-26
+Status recorded: 2026-08-29
 
 ## Source of truth
 
@@ -9,14 +9,14 @@ The owner-controlled GitHub repository is now the authoritative source location 
 - Repository: `murraymarquis41-lang/Velvet-Connect`
 - Authoritative branch: `main`
 - Repository owner has confirmed GitHub `push` and `admin` permission.
-- Current application baseline inherited from merged commit: `eec33672586a916e2be93958f0aa5cb7cbc89278` (`WP-01C: add Supabase staging authentication and backend flows (#5)`).
-- Supabase repository configuration added on 2026-08-26 in commit `d55d6b66bfd923c4bc40de958b332499f7cc260e`.
+- The immutable baseline identifier is the full commit SHA of the commit containing this record. GitHub `main` may advance, so release and verification work must use that SHA rather than the branch name.
+- The baseline descends from merged Build 03 staging work and includes the subsequent Supabase configuration, foundational schema recovery, production-verification deployment separation, release-smoke checks, and authenticated synthetic-E2E workflow updates.
 
 Scattered ZIP/build artifacts are reference/archive material only unless their contents are deliberately reconciled into this repository and committed to `main` (or merged through an approved pull request).
 
 ## Current MVP identity
 
-The current repository implementation is the Build 03 / staging-MVP line, not a certified Build 04 baseline.
+The current repository implementation is the Build 03 / staging-MVP line, not a separately identified or certified Build 04 baseline.
 
 The committed source presently includes:
 
@@ -49,19 +49,30 @@ The Build 01 archive remains historical and must not replace or redefine this ba
 - Public enrollment remains fail-closed through `VITE_ENABLE_ENROLLMENT=false` until the remaining release gates are verified. The production verification build may identify the production environment and allow existing authorized users to sign in, but it must not open new-user enrollment while the gate is false.
 - Staging and production project identities must never be hard-coded interchangeably in browser source.
 
-## Migration completeness warning
+## Migration completeness
 
-GitHub now contains the currently supplied migration file:
+GitHub contains both the recovered foundational Build 03 schema and the follow-up onboarding migration:
 
+- `supabase/migrations/20260813004637_build_03_recovered_live_schema.sql`
 - `supabase/migrations/20260825000100_enable_staging_profile_onboarding.sql`
 
-That migration is a follow-up authorization/onboarding migration. By itself it does **not** define the foundational `profiles`, `swipes`, `matches`, or messaging schema from an empty database. Therefore the repository is the authoritative source for the code that is currently available, but the database baseline is not yet fully reconstructable from GitHub alone until the foundational migration set exists in this repository and is tested.
-
-No engineer should claim a clean-database rebuild is reproducible until that foundational migration set exists in this repository and is tested.
+The foundational migration defines the committed profiles, profile photos, swipes, matches, messages, blocks, reports, supporting functions/triggers, grants, and row-level-security policies. A clean-database reconstruction still requires an independent migration replay against a disposable Supabase project before reconstruction can be certified.
 
 ## Build 04 status
 
-No repository evidence inspected on 2026-08-26 establishes a distinct completed Build 04 source baseline. Build 04 must receive its own commit/merge identity and pass the required engineering, staging, and release gates before this document is updated to designate it authoritative.
+No repository or supplied-archive evidence inspected on 2026-08-29 establishes a distinct completed Build 04 source baseline. The supplied archive is Build 01-era source and does not contain a dependency lockfile, Supabase migrations/configuration, or deployment workflow, so it remains historical evidence only. Build 04 must receive its own commit/merge identity and pass the required engineering, staging, and release gates before this document is updated to designate it authoritative.
+
+## Verification at baseline creation
+
+The baseline was prepared from a clean clone and checked with Node 24.19.0 and npm 11.9.0 using:
+
+1. `npm ci`
+2. `npm run lint`
+3. `npm run typecheck`
+4. `npm test`
+5. `npm run build`
+
+Passing these local engineering gates establishes repository build reproducibility. It does not by itself certify live Supabase behavior, deployment completion, clean-database reconstruction, Build 04 completion, or production release authorization; those remain governed by their dedicated workflows and approval gates.
 
 ## Baseline rule going forward
 
