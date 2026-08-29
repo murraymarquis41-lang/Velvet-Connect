@@ -1,4 +1,4 @@
-name: Live staging release smoke
+name: Production verification release smoke
 
 on:
   push:
@@ -19,27 +19,34 @@ jobs:
           URL="https://murraymarquis41-lang.github.io/Velvet-Connect/"
           for attempt in $(seq 1 18); do
             if curl -fsSL --retry 2 --retry-delay 2 "$URL" -o /tmp/velvet.html; then
-              if grep -q "Velvet Connect" /tmp/velvet.html && grep -q "STAGING · SYNTHETIC TEST ACCOUNTS ONLY" /tmp/velvet.html; then
-                echo "Public Pages surface verified: $URL"
-                exit 0
+              ASSET=$(sed -n 's#.*src="\([^"]*assets/index-[^"]*\.js\)".*#\1#p' /tmp/velvet.html | head -1)
+              if [ -n "$ASSET" ]; then
+                ORIGIN=$(printf '%s' "$URL" | sed -E 's#^(https?://[^/]+).*#\1#')
+                curl -fsSL "${ORIGIN}${ASSET}" -o /tmp/velvet.js
+                if grep -q "Velvet Connect" /tmp/velvet.html \
+                  && grep -q "PRODUCTION VERIFICATION · ENROLLMENT PAUSED" /tmp/velvet.js \
+                  && grep -q "https://rrtxdzwfudlqbcticmlp.supabase.co" /tmp/velvet.js; then
+                  echo "Public production-verification surface verified: $URL"
+                  exit 0
+                fi
               fi
             fi
             echo "Waiting for current Pages deployment (attempt $attempt/18)..."
             sleep 10
           done
-          echo "Expected Velvet Connect staging content was not observed at $URL" >&2
+          echo "Expected Velvet Connect production-verification content was not observed at $URL" >&2
           exit 1
 
       - name: Verify Supabase Auth service health
         shell: bash
         env:
-          SUPABASE_PUBLISHABLE_KEY: sb_publishable_HuzOX6mv9QBruN_8Ct3n6Q_CFNrt4pe
+          SUPABASE_PUBLISHABLE_KEY: sb_publishable_sknzlD0MStONUuCDRSl_gg_f1oS_T5M
         run: |
           set -euo pipefail
           curl -fsS \
             -H "apikey: ${SUPABASE_PUBLISHABLE_KEY}" \
             -H "Authorization: Bearer ${SUPABASE_PUBLISHABLE_KEY}" \
-            "https://qqintbwoalvoegvqoxlo.supabase.co/auth/v1/health" \
+            "https://rrtxdzwfudlqbcticmlp.supabase.co/auth/v1/health" \
             -o /tmp/auth-health.json
           grep -q '"name":"GoTrue"' /tmp/auth-health.json
           cat /tmp/auth-health.json
@@ -47,13 +54,13 @@ jobs:
       - name: Verify Supabase REST key and anonymous RLS protection
         shell: bash
         env:
-          SUPABASE_PUBLISHABLE_KEY: sb_publishable_HuzOX6mv9QBruN_8Ct3n6Q_CFNrt4pe
+          SUPABASE_PUBLISHABLE_KEY: sb_publishable_sknzlD0MStONUuCDRSl_gg_f1oS_T5M
         run: |
           set -euo pipefail
           STATUS=$(curl -sS -o /tmp/profiles.json -w "%{http_code}" \
             -H "apikey: ${SUPABASE_PUBLISHABLE_KEY}" \
             -H "Authorization: Bearer ${SUPABASE_PUBLISHABLE_KEY}" \
-            "https://qqintbwoalvoegvqoxlo.supabase.co/rest/v1/profiles?select=id&limit=1")
+            "https://rrtxdzwfudlqbcticmlp.supabase.co/rest/v1/profiles?select=id&limit=1")
           BODY=$(tr -d '[:space:]' < /tmp/profiles.json)
           echo "Profiles probe HTTP status: $STATUS"
           if [ "$STATUS" = "200" ]; then
