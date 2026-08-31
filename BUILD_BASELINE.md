@@ -1,6 +1,6 @@
 # VELVET Connect Authoritative Build Baseline
 
-Status recorded: 2026-08-29
+Status updated: 2026-08-31
 
 ## Source of truth
 
@@ -10,15 +10,17 @@ The owner-controlled GitHub repository is now the authoritative source location 
 - Authoritative branch: `main`
 - Repository owner has confirmed GitHub `push` and `admin` permission.
 - The immutable baseline identifier is the full commit SHA of the commit containing this record. GitHub `main` may advance, so release and verification work must use that SHA rather than the branch name.
-- The baseline descends from merged Build 03 staging work and includes the subsequent Supabase configuration, foundational schema recovery, production-verification deployment separation, release-smoke checks, and authenticated synthetic-E2E workflow updates.
+- The certified predecessor is commit `16f82792a94cb6d6b1e46ac3c2d0aa9ce78b9860`.
 
 Scattered ZIP/build artifacts are reference/archive material only unless their contents are deliberately reconciled into this repository and committed to `main` (or merged through an approved pull request).
 
-## Current MVP identity
+## Certified predecessor and Build 03 identity
 
-The current repository implementation is the Build 03 / staging-MVP line, not a separately identified or certified Build 04 baseline.
+Commit `16f82792a94cb6d6b1e46ac3c2d0aa9ce78b9860` is the certified predecessor used for the legitimate Build 03 milestone delta. It is not relabeled by the new work.
 
-The committed source presently includes:
+Build 03 is assigned only to the new direct-child commit carrying `BUILD_03_DELTA.md` and the immutable `build-03` Git tag. The tag, rather than a loose ZIP filename or a moving branch, is the human-readable build identity.
+
+The Build 03 source includes:
 
 - reproducible npm project metadata and `package-lock.json`
 - Vite build configuration
@@ -29,6 +31,9 @@ The committed source presently includes:
 - profile creation and persistence
 - discovery and likes/swipes flows
 - match and chat-facing application flows
+- adults-only enrollment and policy-consent controls
+- a role-gated human moderation queue with immutable action logs
+- authenticated complete account deletion
 - Supabase migration material under `supabase/migrations/`
 - Supabase CLI/project configuration under `supabase/config.toml`
 
@@ -51,10 +56,11 @@ The Build 01 archive remains historical and must not replace or redefine this ba
 
 ## Migration completeness
 
-GitHub contains both the recovered foundational Build 03 schema and the follow-up onboarding migration:
+GitHub contains the recovered foundational schema, the follow-up onboarding migration, and the Build 03 milestone migration:
 
 - `supabase/migrations/20260813004637_build_03_recovered_live_schema.sql`
 - `supabase/migrations/20260825000100_enable_staging_profile_onboarding.sql`
+- `supabase/migrations/20260831000100_build_03_moderation_enrollment_deletion.sql`
 
 The foundational migration defines the committed profiles, profile photos, swipes, matches, messages, blocks, reports, supporting functions/triggers, grants, and row-level-security policies. A clean-database reconstruction still requires an independent migration replay against a disposable Supabase project before reconstruction can be certified.
 
