@@ -2,7 +2,7 @@ name: Deploy production verification build to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [main, feature/build-03-milestone-delta]
   workflow_dispatch:
 
 permissions:
@@ -48,6 +48,11 @@ jobs:
 
       - name: Production build
         run: npm run build
+
+      - name: Record exact deployment identity
+        shell: bash
+        run: |
+          printf '{"commit":"%s","environment":"production-verification","enrollment":"paused"}\n' "$GITHUB_SHA" > dist/build-metadata.json
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
