@@ -8,7 +8,7 @@
   <style>
     * { box-sizing: border-box; }
     body { margin: 0; min-height: 100vh; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: #0a0015; color: #fff; }
-    button, input, textarea { font: inherit; }
+    button, input, textarea, select { font: inherit; }
     .environment-banner { background: #5b1738; padding: 8px 16px; text-align: center; font-size: .78rem; letter-spacing: .08em; }
     .app-container { max-width: 560px; min-height: calc(100vh - 32px); margin: 0 auto; }
     .page { display: none; min-height: 100%; padding: 32px 20px 110px; }
@@ -26,8 +26,8 @@
     .btn:disabled { cursor: wait; opacity: .6; }
     .input-group { margin: 0 0 18px; }
     label { display: block; margin-bottom: 7px; color: #d6cfda; font-size: .88rem; }
-    input, textarea { width: 100%; padding: 13px 14px; border: 1px solid rgba(255,255,255,.14); border-radius: 12px; outline: none; color: #fff; background: rgba(255,255,255,.08); }
-    input:focus, textarea:focus { border-color: #ff2f8b; box-shadow: 0 0 0 3px rgba(255,47,139,.18); }
+    input, textarea, select { width: 100%; padding: 13px 14px; border: 1px solid rgba(255,255,255,.14); border-radius: 12px; outline: none; color: #fff; background: rgba(255,255,255,.08); }
+    input:focus, textarea:focus, select:focus { border-color: #ff2f8b; box-shadow: 0 0 0 3px rgba(255,47,139,.18); }
     a { color: #ff74b2; }
     .status { min-height: 1.5rem; margin: 14px 0 0; text-align: center; color: #ffb3d1; }
     .status.success { color: #8dffb1; }
@@ -39,6 +39,13 @@
     .card-swipe img { width: 100%; height: 330px; object-fit: cover; background: #191020; }
     .card-copy { padding: 20px; }
     .swipe-actions { display: flex; gap: 16px; margin-top: 16px; }
+    .checkbox-row { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: start; }
+    .checkbox-row input { width: auto; margin-top: 4px; }
+    .danger-zone { border-color: rgba(255,83,112,.45); }
+    .danger { background: #a51d3d; }
+    .moderation-case { padding: 16px 0; border-bottom: 1px solid rgba(255,255,255,.1); }
+    .moderation-case:last-child { border-bottom: 0; }
+    .moderation-actions { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; }
   </style>
 </head>
 <body>
@@ -54,6 +61,9 @@
         <div class="input-group"><label for="signupName">Display name</label><input id="signupName" minlength="2" maxlength="60" autocomplete="name" required></div>
         <div class="input-group"><label for="signupEmail">Email</label><input id="signupEmail" type="email" autocomplete="email" required></div>
         <div class="input-group"><label for="signupPassword">Password</label><input id="signupPassword" type="password" minlength="8" autocomplete="new-password" required></div>
+        <div class="input-group"><label for="signupBirthDate">Date of birth</label><input id="signupBirthDate" type="date" autocomplete="bday" required></div>
+        <div class="input-group checkbox-row"><input id="signupAdultAttestation" type="checkbox" required><label for="signupAdultAttestation">I confirm that I am at least 18 years old.</label></div>
+        <div class="input-group checkbox-row"><input id="signupTermsConsent" type="checkbox" required><label for="signupTermsConsent">I accept the Terms and Privacy Notice for this staging release.</label></div>
         <button class="btn" id="signupButton" type="submit">Create Account</button><p class="status" id="signupStatus" role="status" aria-live="polite"></p>
         <p><a href="#" onclick="navigateTo('loginPage')">Already have an account?</a></p>
       </form>
@@ -83,13 +93,16 @@
     <section class="page" id="dashboardPage">
       <h2>Discover</h2>
       <div class="glass card-swipe" id="profileCard"><img id="cardPhoto" alt="Profile"><div class="card-copy"><h3 id="cardName">Loading…</h3><p id="cardBio" class="muted"></p><p id="cardInterests"></p></div></div>
-      <div class="swipe-actions"><button class="btn btn-outline" type="button" onclick="swipeLeft()">Pass</button><button class="btn" type="button" onclick="swipeRight()">Like</button></div><p class="status" id="discoverStatus" role="status" aria-live="polite"></p>
+      <div class="swipe-actions"><button class="btn btn-outline" type="button" onclick="swipeLeft()">Pass</button><button class="btn" type="button" onclick="swipeRight()">Like</button></div>
+      <details class="glass"><summary>Report or block this profile</summary><div class="input-group"><label for="reportReason">Reason</label><select id="reportReason"><option value="harassment">Harassment</option><option value="impersonation">Impersonation</option><option value="hate">Hate or discrimination</option><option value="violence">Violence or threats</option><option value="underage concern">Underage concern</option><option value="other">Other</option></select></div><div class="input-group"><label for="reportDetails">What happened?</label><textarea id="reportDetails" rows="3" maxlength="2000"></textarea></div><button class="btn btn-outline" type="button" onclick="reportCurrentProfile()">Report and Disconnect</button></details>
+      <p class="status" id="discoverStatus" role="status" aria-live="polite"></p>
     </section>
     <section class="page" id="matchPage"><div class="glass"><h2>It’s a match</h2><p id="matchName"></p><button class="btn" type="button" onclick="navigateTo('chatPage')">Open Messages</button></div></section>
     <section class="page" id="chatPage"><h2>Messages</h2><div class="glass" id="chatMessages"><p class="muted">Live messaging becomes available after a verified mutual match.</p></div><div class="input-group"><label for="chatInput">Message</label><input id="chatInput" maxlength="2000"></div><button class="btn" type="button" onclick="sendMessage()">Send</button></section>
-    <section class="page" id="settingsPage"><h2>Settings</h2><div class="glass"><button class="btn btn-outline" type="button" onclick="logout()">Sign Out</button></div></section>
+    <section class="page" id="settingsPage"><h2>Settings</h2><div class="glass"><button class="btn btn-outline" type="button" onclick="logout()">Sign Out</button></div><div class="glass" id="appealPanel" hidden><h3>Appeal a moderation decision</h3><div class="input-group"><label for="appealCase">Eligible case</label><select id="appealCase"></select></div><div class="input-group"><label for="appealStatement">Your statement</label><textarea id="appealStatement" rows="4" minlength="10" maxlength="2000"></textarea></div><button class="btn btn-outline" type="button" onclick="submitAppeal()">Submit Appeal</button><p class="status" id="appealStatus" role="status" aria-live="polite"></p></div><div class="glass danger-zone"><h3>Delete account</h3><p class="muted">This permanently deletes your authentication identity and all user-owned data in this release, including your profile, matches, messages, reports, and blocks. Photo Storage upload is not enabled in this release. This cannot be undone.</p><div class="input-group"><label for="deleteConfirmation">Type DELETE to confirm</label><input id="deleteConfirmation" autocomplete="off"></div><button class="btn danger" id="deleteAccountButton" type="button" onclick="deleteAccount()">Permanently Delete Account</button><p class="status" id="deleteStatus" role="status" aria-live="polite"></p></div></section>
+    <section class="page" id="adminPage"><h2>Moderation</h2><div class="glass"><p class="muted">Human review queue. Every action requires a reason and is written to the immutable audit log.</p><button class="btn btn-outline" type="button" onclick="loadModerationQueue()">Refresh Queue</button><p class="status" id="moderationStatus" role="status" aria-live="polite"></p><div id="moderationQueue"></div></div><div class="glass"><h3>Pending appeals</h3><p class="muted">Appeals require a safety administrator or CEO who was not the original case assignee.</p><div id="appealQueue"></div></div></section>
   </main>
-  <nav class="nav-bottom" id="bottomNav" aria-label="Primary"><button class="nav-item active" data-page="dashboardPage" onclick="navigateTo('dashboardPage')">Discover</button><button class="nav-item" data-page="chatPage" onclick="navigateTo('chatPage')">Chats</button><button class="nav-item" data-page="profileSetupPage" onclick="navigateTo('profileSetupPage')">Profile</button><button class="nav-item" data-page="settingsPage" onclick="navigateTo('settingsPage')">Settings</button></nav>
+  <nav class="nav-bottom" id="bottomNav" aria-label="Primary"><button class="nav-item active" data-page="dashboardPage" onclick="navigateTo('dashboardPage')">Discover</button><button class="nav-item" data-page="chatPage" onclick="navigateTo('chatPage')">Chats</button><button class="nav-item" data-page="profileSetupPage" onclick="navigateTo('profileSetupPage')">Profile</button><button class="nav-item" data-page="settingsPage" onclick="navigateTo('settingsPage')">Settings</button><button class="nav-item" id="adminNav" data-page="adminPage" onclick="navigateTo('adminPage')" hidden>Admin</button></nav>
   <script type="module" src="./src/app.ts"></script>
 </body>
 </html>
