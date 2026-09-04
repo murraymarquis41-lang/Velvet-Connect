@@ -239,12 +239,22 @@ async function run() {
   console.log("AUTHENTICATED BUILD 03 SYNTHETIC E2E PASS");
 }
 
+let runFailure = null;
 try {
   await run();
-} finally {
-  for (const id of createdUserIds.reverse()) {
-    const { error } = await admin.auth.admin.deleteUser(id);
-    if (error) console.error("cleanup warning: a synthetic user could not be removed");
-  }
-  await Promise.all(Object.values(clients).map((client) => client.auth.signOut()));
+} catch (error) {
+  runFailure = error;
 }
+
+const cleanupFailures = [];
+for (const id of createdUserIds.reverse()) {
+  const { error } = await admin.auth.admin.deleteUser(id);
+  if (error) cleanupFailures.push(error.message);
+}
+await Promise.all(Object.values(clients).map((client) => client.auth.signOut()));
+
+if (cleanupFailures.length > 0) {
+  throw new Error(`synthetic cleanup failed for ${cleanupFailures.length} account(s)`);
+}
+if (runFailure) throw runFailure;
+console.log("SYNTHETIC CLEANUP PASS");
