@@ -23,7 +23,8 @@ Authorized scope:
 
 | Gate | Current status | Evidence / next action |
 |---|---|---|
-| PR #15 remains draft | PASS | GitHub PR metadata shows draft=true. |
+| PR #15 remains draft | PASS | GitHub PR metadata shows `draft=true`. |
+| Authoritative staging project | PASS / RECONCILED | `qqintbwoalvoegvqoxlo` is connected as **Velvet Connect Staging** and is the target of authenticated Build 03 E2E. `rrtxdzwfudlqbcticmlp` is a separate older project used by the enrollment-paused public verification build. |
 | Real-user enrollment closed | PASS / CONTROL | Production-verification build sets enrollment paused; no beta authorization granted. |
 | Report creates human-review case | PASS | Database trigger queues a moderation case after report insert. |
 | Report immediately disconnects pair | PASS | Database trigger creates a block; RLS prevents further discovery/match/message access. |
@@ -36,10 +37,11 @@ Authorized scope:
 | Full two-sided safety statement/evidence workflow | PARTIAL PASS | Staging migration evidence confirms two-sided pre-decision case statements and anonymous RPC privilege removal. Secure screenshot/evidence storage, retention controls, and complete authenticated flow evidence remain open. |
 | Age-assurance vendor requirements | COMPLETE (requirements only) | See `AGE_ASSURANCE_VENDOR_REQUIREMENTS.md`. No vendor is approved or integrated yet. |
 | Expanded authenticated QA | PARTIAL PASS | Existing 12-step authenticated synthetic E2E passes. Add/report evidence for the corrected two-sided reporting flow and human CEO-role session before closure. |
-| CEO moderator account provisioned | BLOCKED | Staging Supabase currently contains zero Auth users; there is no CEO Auth identity to grant `moderator_roles.role='ceo'`. Create CEO staging identity through Supabase Auth first; do not insert an Auth row directly in SQL. |
+| CEO moderator account provisioned | BLOCKED — USER ACTION REQUIRED | Fresh SQL on authoritative staging `qqintbwoalvoegvqoxlo` confirms zero persistent Auth users and zero moderator-role rows. Create or invite the CEO through Supabase Auth first; do not insert an Auth row directly in SQL. |
 | CEO moderator authenticated human-role QA | BLOCKED | Depends on CEO staging Auth account provisioning. |
-| Supabase security advisor | OPEN — FRESH EVIDENCE AND HUMAN REVIEW REQUIRED | Prior evidence records five `authenticated_security_definer_function_executable` warnings for `delete_own_account`, `moderate_case`, `review_moderation_appeal`, `submit_moderation_appeal`, and `submit_moderation_case_statement`. Capture fresh advisor/SQL output and obtain independent human security/privacy acceptance or remediation. |
-| Supabase performance advisor | INFO ONLY | Current findings are unused-index informational notices. Re-evaluate with representative traffic before removing indexes. |
+| Supabase migration/SQL evidence | PASS / RECONSTRUCTION OPEN | Fresh 2026-09-11 evidence on `qqintbwoalvoegvqoxlo` confirms 14 applied migration-history entries, the Build 03 moderation tables, required RLS/FORCE RLS state, empty-search-path function settings, authenticated EXECUTE, and no anonymous EXECUTE for the five exposed RPCs. Repository-to-ledger reconstruction remains open. |
+| Supabase security advisor | OPEN — HUMAN REVIEW REQUIRED | Fresh 2026-09-11 advisor output records five `authenticated_security_definer_function_executable` warnings for `delete_own_account`, `moderate_case`, `review_moderation_appeal`, `submit_moderation_appeal`, and `submit_moderation_case_statement`. No additional security lints were returned. Obtain independent human acceptance or remediation. |
+| Supabase performance advisor | OPEN — LOW-SEVERITY REMEDIATION | Fresh 2026-09-11 output reports one unindexed foreign key and four unused-index INFO findings, plus one WARN for multiple permissive SELECT policies on `moderation_case_statements`. Resolve or document the WARN; retain unused indexes until representative traffic exists. |
 | Independent human security review | OPEN | Reviewer must inspect exact final SHA, RLS, grants, privileged RPCs, admin-role provisioning, reporting/evidence flow, deletion, and deployment configuration. |
 | Independent privacy review | OPEN | Reviewer must inspect data minimization, report/evidence retention, age-assurance data flow, deletion, logging, and vendor requirements. |
 | GitHub Pages exact-SHA deployment | PASS at evidence baseline | Deployment run [34256429668](https://github.com/murraymarquis41-lang/Velvet-Connect/actions/runs/34256429668) succeeded for `7b8d44cdeede7d1b55290387a8c1053ba8370c83`. Final candidate must repeat this gate. |
