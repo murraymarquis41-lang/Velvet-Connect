@@ -1,8 +1,15 @@
 # Velvet Connect Build 03 Delta
 
-Build 03 is the commit containing this document. Its direct parent must be the
-certified baseline `16f82792a94cb6d6b1e46ac3c2d0aa9ce78b9860`. The immutable
-Git tag `build-03` is the human-readable identity for that commit.
+Build 03 is being reconciled on branch `feature/build-03-milestone-delta` from
+certified predecessor `16f82792a94cb6d6b1e46ac3c2d0aa9ce78b9860`. At the start of
+the evidence-reconciliation sprint, PR #15 and the branch matched verified
+candidate `7b8d44cdeede7d1b55290387a8c1053ba8370c83`.
+
+The existing annotated `build-03` tag still resolves to original milestone
+`d04ba7eb83bf98b36ce448c3761274cf7a7beefd`. It is intentionally unreconciled
+and must not move until the final candidate is frozen and every release gate
+passes. Documentation-only reconciliation commits may advance the draft PR head;
+no later head is release-certified until the full gate set is rerun against it.
 
 ## Authorized scope
 
@@ -68,9 +75,11 @@ dependency install:
 5. `npm run build` with staging public environment variables
 6. `npm audit --audit-level=high`
 7. `git diff --check`
-8. direct-parent verification against the certified baseline
+8. ancestry and authorized-delta verification against the certified predecessor
 
-These checks certify the repository delta and reproducible browser build. They
-do not claim that the new migration has been deployed, that live staging E2E
-has passed, or that the public production-verification site has been updated.
-Those remain separate deployment gates.
+These checks certify the repository delta and reproducible browser build only
+when recorded against one exact candidate SHA. Staging migration history,
+authenticated staging E2E, Supabase advisor evidence, GitHub Pages deployment,
+public exact-SHA smoke, CEO-role human QA, and independent human security/privacy
+review remain separate gates. Passing evidence at an earlier candidate does not
+release-certify a later documentation or code commit.
