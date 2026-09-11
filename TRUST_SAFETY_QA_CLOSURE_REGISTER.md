@@ -3,6 +3,10 @@
 Status: ACTIVE — beta enrollment approval must not be requested yet
 PR: #15 (must remain draft)
 Enrollment: CLOSED to real users
+Evidence baseline at sprint start: `7b8d44cdeede7d1b55290387a8c1053ba8370c83`
+
+Documentation-only reconciliation commits may advance the draft PR head. No later
+head is release-certified until every required gate is rerun against that exact SHA.
 
 ## Closure sprint authorization
 
@@ -29,18 +33,18 @@ Authorized scope:
 | Independent appeal reviewer | PASS (synthetic) | Original case assignee cannot review appeal; separate safety reviewer can. |
 | Immutable moderation audit | PASS (synthetic) | Update attempt against moderation audit is rejected. |
 | Self-service deletion | PASS (synthetic) | Auth identity and profile deletion are verified by E2E. |
-| Full two-sided safety statement/evidence workflow | OPEN | Current product supports reporter details and a later appellant statement, but not a complete pre-decision two-sided statement/evidence collection flow. Must be corrected/evidenced before beta. Secure screenshot/evidence storage is not currently enabled. |
+| Full two-sided safety statement/evidence workflow | PARTIAL PASS | Staging migration evidence confirms two-sided pre-decision case statements and anonymous RPC privilege removal. Secure screenshot/evidence storage, retention controls, and complete authenticated flow evidence remain open. |
 | Age-assurance vendor requirements | COMPLETE (requirements only) | See `AGE_ASSURANCE_VENDOR_REQUIREMENTS.md`. No vendor is approved or integrated yet. |
 | Expanded authenticated QA | PARTIAL PASS | Existing 12-step authenticated synthetic E2E passes. Add/report evidence for the corrected two-sided reporting flow and human CEO-role session before closure. |
 | CEO moderator account provisioned | BLOCKED | Staging Supabase currently contains zero Auth users; there is no CEO Auth identity to grant `moderator_roles.role='ceo'`. Create CEO staging identity through Supabase Auth first; do not insert an Auth row directly in SQL. |
 | CEO moderator authenticated human-role QA | BLOCKED | Depends on CEO staging Auth account provisioning. |
-| Supabase security advisor | OPEN — HUMAN REVIEW REQUIRED | Four `authenticated_security_definer_function_executable` warnings remain for `delete_own_account`, `moderate_case`, `review_moderation_appeal`, and `submit_moderation_appeal`. These are deliberately privilege-checking RPCs but require independent human security/privacy acceptance or remediation. |
+| Supabase security advisor | OPEN — FRESH EVIDENCE AND HUMAN REVIEW REQUIRED | Prior evidence records five `authenticated_security_definer_function_executable` warnings for `delete_own_account`, `moderate_case`, `review_moderation_appeal`, `submit_moderation_appeal`, and `submit_moderation_case_statement`. Capture fresh advisor/SQL output and obtain independent human security/privacy acceptance or remediation. |
 | Supabase performance advisor | INFO ONLY | Current findings are unused-index informational notices. Re-evaluate with representative traffic before removing indexes. |
 | Independent human security review | OPEN | Reviewer must inspect exact final SHA, RLS, grants, privileged RPCs, admin-role provisioning, reporting/evidence flow, deletion, and deployment configuration. |
 | Independent privacy review | OPEN | Reviewer must inspect data minimization, report/evidence retention, age-assurance data flow, deletion, logging, and vendor requirements. |
-| GitHub Pages exact-SHA deployment | FAILING | Verify/build/artifact steps pass; deploy-to-Pages step fails. Release blocker tracked in issue #16. |
-| Public exact-SHA release smoke | BLOCKED/FAILING | Public URL returns 404 while Pages deploy is unsuccessful. Smoke must verify final SHA and enrollment-paused metadata after deployment succeeds. |
-| Build identity/tag reconciliation | OPEN | Final sprint changes move PR head beyond prior source-certification SHA. Reconcile the final Build 03 certification identity and `build-03` tag only after closure changes stop moving the head. |
+| GitHub Pages exact-SHA deployment | PASS at evidence baseline | Deployment run [34256429668](https://github.com/murraymarquis41-lang/Velvet-Connect/actions/runs/34256429668) succeeded for `7b8d44cdeede7d1b55290387a8c1053ba8370c83`. Final candidate must repeat this gate. |
+| Public exact-SHA release smoke | PASS at evidence baseline | Smoke run [34256429709](https://github.com/murraymarquis41-lang/Velvet-Connect/actions/runs/34256429709) verified public metadata for `7b8d44cdeede7d1b55290387a8c1053ba8370c83` with enrollment paused. Final candidate must repeat this gate. |
+| Build identity/tag reconciliation | OPEN / CONTROLLED | PR #15 and its feature branch matched `7b8d44cdeede7d1b55290387a8c1053ba8370c83` at sprint start. The existing annotated `build-03` tag still resolves to original milestone `d04ba7eb83bf98b36ce448c3761274cf7a7beefd`; do not move it until closure changes stop, the final SHA is frozen, and all gates pass. |
 | Beta enrollment approval | NOT REQUESTED | Must remain withheld until every required closure gate is evidenced and CEO receives the final packet. |
 
 ## Reporting-flow correction acceptance criteria
@@ -63,7 +67,7 @@ The corrected safety-reporting flow must preserve the controls that already pass
 ### Security
 - Can any ordinary authenticated user read moderation cases, actions, appeals, roles, or another member's private report?
 - Can any ordinary authenticated user invoke privileged RPC behavior beyond what the function's internal authorization permits?
-- Are the four SECURITY DEFINER RPCs narrowly scoped, search-path hardened, authorization checked, and safe against parameter abuse/replay?
+- Are the five documented SECURITY DEFINER RPCs narrowly scoped, search-path hardened, authorization checked, and safe against parameter abuse/replay?
 - Are moderator and CEO role grants least-privilege and auditable?
 - Does report-and-disconnect remain effective across discovery, matches, and messages?
 - Are deletion and audit de-identification behaviors consistent and non-bypassable?
