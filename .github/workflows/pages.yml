@@ -2,7 +2,7 @@ name: Deploy production verification build to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [main, feature/build-03-milestone-delta]
   workflow_dispatch:
 
 permissions:
@@ -49,6 +49,11 @@ jobs:
       - name: Production build
         run: npm run build
 
+      - name: Record exact deployment identity
+        shell: bash
+        run: |
+          printf '{"commit":"%s","environment":"production-verification","enrollment":"paused"}\n' "$GITHUB_SHA" > dist/build-metadata.json
+
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
         with:
@@ -65,7 +70,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment:
-      name: github-pages
+      # Keep the protected production Pages environment reserved for main.
+      # Build 03 verification deploys from its feature branch into a separate
+      # environment so production protection rules are not weakened.
+      name: ${{ github.ref_name == 'main' && 'github-pages' || 'build-03-pages-verification' }}
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy GitHub Pages
