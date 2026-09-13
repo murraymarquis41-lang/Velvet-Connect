@@ -1,6 +1,6 @@
 # Build 03 Migration-History Reconciliation
 
-Status: **OPEN — isolated reconstruction still required**
+Status: **PARTIAL — clean PostgreSQL replay passed; Supabase-isolated advisor/E2E proof remains required**
 
 This record reconciles the repository migration chain with the historical migration ledger in the authoritative Velvet Connect staging project without rewriting or deleting the staging ledger.
 
@@ -31,7 +31,7 @@ The repository intentionally contains `20260813004637_build_03_recovered_live_sc
 | `20260904075719_grant_least_privilege_member_updates` | `20260904075719_grant_least_privilege_member_updates.sql` | Direct match |
 | `20260904082031_build_03_performance_advisor_hardening` | `20260904082031_build_03_performance_advisor_hardening.sql` | Direct match |
 | `20260904181824_allow_audit_actor_deidentification` | `20260904181824_allow_audit_actor_deidentification.sql` | Direct match |
-| `20260905182323_trust_safety_reporting_triage` | No standalone repository file | **Unresolved historical delta: must be proven represented by canonical schema/migrations before closure** |
+| `20260905182323_trust_safety_reporting_triage` | `20260913233000_restore_admin_diagnostics.sql` | Historical delta identified as `public.admin_diagnostics()` and restored forward-only with staging-equivalent authorization and grants |
 | `20260905184446_issue_17_two_sided_case_statements` | `20260905183500_issue_17_two_sided_case_statements.sql` | Equivalent feature; timestamp differs |
 | `20260905184459_issue_17_case_statement_rpc_privilege_hardening` | Folded into `20260905183500_issue_17_two_sided_case_statements.sql` | Repository migration already revokes public access and grants authenticated EXECUTE; verify in isolated reconstruction |
 
@@ -49,18 +49,40 @@ The current `submit_moderation_case_statement` implementation matches the reposi
 
 This spot check is evidence of current-schema alignment only. It does **not** by itself prove that a clean database can be reconstructed from the repository migration chain.
 
-## Required isolated-reconstruction gate
+## 2026-09-13 clean-replay evidence
+
+A clean PostgreSQL 18.3 environment (PGlite 0.5.8) was initialized with only
+the Supabase Auth role/schema prerequisites and then given every repository
+migration exactly once, in filename order, from a working tree based on
+`533102f00774ad17a35ac8ae4aee05e8f23a154e` plus the forward-only
+`20260913233000_restore_admin_diagnostics.sql` reconciliation migration.
+
+- All nine migrations applied without manual repair.
+- The resulting 12 public tables and 25 public RLS policies match staging by
+  name and command/role surface.
+- Live comparison identified `public.admin_diagnostics()` as the sole missing
+  function from the historical `trust_safety_reporting_triage` migration.
+- The forward migration restores the live `SECURITY DEFINER`, empty
+  `search_path`, CEO/safety-admin authorization checks, anonymous denial, and
+  authenticated/service-role EXECUTE grants.
+- Behavioral checks confirm CEO execution succeeds, a non-admin authenticated
+  user is denied, anonymous EXECUTE is absent, and the Issue #17 migration
+  retains authenticated-only RPC access.
+
+The Supabase branch API was also attempted after an explicit $0.01344/hour
+cost confirmation, but Supabase rejected branch creation because the
+organization is on the Free plan. No paid branch was created. Consequently,
+advisor and full Auth/E2E evidence against a clean Supabase branch remains open
+and this record does not claim final reconstruction-gate closure.
+
+## Remaining isolated-reconstruction gate
 
 Before this gate can close:
 
-1. Start from a clean isolated Supabase/Postgres environment, not the current staging database.
-2. Apply repository migrations in filename order from the exact Build 03 candidate commit.
-3. Confirm every migration applies exactly once with no manual repair.
-4. Compare resulting tables, columns, constraints, indexes, triggers, RLS policies, grants, and function definitions against staging.
-5. Specifically resolve `20260905182323_trust_safety_reporting_triage` by proving its live effects are represented in the canonical repository chain or by adding a forward-only repository migration that recreates only the missing effect.
-6. Verify Issue #17 RPC privilege hardening is represented by the canonical Issue #17 migration.
-7. Rerun security/performance advisors and authenticated synthetic E2E against the isolated reconstruction.
-8. Record exact candidate SHA and evidence URLs/results.
+1. Freeze and record the exact Build 03 candidate SHA containing the forward migration.
+2. Replay that exact SHA in a full isolated Supabase environment when a Pro branch or equivalent disposable stack is available.
+3. Rerun security/performance advisors and authenticated synthetic E2E against that isolated reconstruction.
+4. Record the resulting evidence URLs and close this gate only if they pass.
 
 ## Prohibited reconciliation shortcuts
 
