@@ -31,7 +31,7 @@ Captured through read-only management and SQL access on 2026-09-11 UTC:
   `delete_own_account`, `moderate_case`, `review_moderation_appeal`,
   `submit_moderation_appeal`, and `submit_moderation_case_statement`.
 - Persistent Auth users: zero.
-- Persistent moderator-role rows: zero.
+- Persistent moderator-role rows at capture time: zero.
 
 ## Fresh advisors
 
@@ -60,9 +60,28 @@ Performance advisor:
 ## Gate impact
 
 - Supabase management access and fresh evidence capture are complete.
-- CEO moderator provisioning remains blocked because no verified persistent CEO
-  Auth identity exists in authoritative staging.
-- Clean repository migration reconstruction remains open.
+- CEO moderator provisioning was blocked at capture time because no persistent
+  CEO Auth identity existed in authoritative staging.
+- Clean repository migration reconstruction remained open at capture time.
 - Independent human security/privacy acceptance remains open.
 - PR #15 remains draft; enrollment remains closed; beta/production release
   remains unauthorized; the `build-03` tag remains untouched.
+
+## 2026-09-13 addendum
+
+- Supabase invitation sent to `murraymarquis41@gmail.com`.
+- Auth UUID: `135680cb-09f2-4aa3-b902-1591996b01b3`.
+- SQL confirms the matching `moderator_roles` row is active with role `ceo`.
+- The invite is not yet email-confirmed and has no first-sign-in timestamp, so
+  authenticated human-role QA remains blocked on activation.
+- Clean PostgreSQL replay identified the historical
+  `trust_safety_reporting_triage` delta as `public.admin_diagnostics()`; the
+  forward-only `20260913233000_restore_admin_diagnostics.sql` migration now
+  reproduces the staging function and its least-privilege grants.
+- A full isolated Supabase branch replay remains unavailable because Supabase
+  branching is not supported on the organization's Free plan.
+- Refreshed 2026-09-13 security advisors report six authenticated
+  `SECURITY DEFINER` warnings, including `admin_diagnostics`, and a separate
+  warning that leaked-password protection is disabled. The performance advisor
+  remains unchanged: one unindexed-FK INFO, four unused-index INFO findings,
+  and one multiple-permissive-policy WARN.
