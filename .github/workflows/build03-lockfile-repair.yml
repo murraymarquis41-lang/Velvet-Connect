@@ -1,0 +1,71 @@
+name: Build 03 lockfile repair
+
+on:
+  push:
+    branches:
+      - feature/build-03-milestone-delta
+    paths:
+      - package.json
+      - package-lock.json
+      - .github/workflows/build03-lockfile-repair.yml
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate-lockfile:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Check out exact branch head
+        uses: actions/checkout@v4
+        with:
+          ref: feature/build-03-milestone-delta
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Use repository npm version
+        run: npm install --global npm@11.9.0
+
+      - name: Regenerate lockfile from package.json
+        run: npm install --package-lock-only --ignore-scripts
+
+      - name: Verify patched dependency and clean install
+        shell: bash
+        run: |
+          set -euo pipefail
+          node -e "const l=require('./package-lock.json'); const p=l.packages?.['node_modules/js-yaml']; if (!p || p.version !== '4.3.2') { console.error('Expected js-yaml 4.3.2 in package-lock.json'); process.exit(1); }"
+          npm ci --ignore-scripts
+          npm audit --audit-level=high
+
+      - name: Restrict generated changes and self-remove temporary workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          unexpected="$(git diff --name-only | grep -v -E '^(package-lock\.json)$' || true)"
+          if [ -n "$unexpected" ]; then
+            echo "Unexpected generated file changes:" >&2
+            echo "$unexpected" >&2
+            exit 1
+          fi
+          git rm .github/workflows/build03-lockfile-repair.yml
+          changed="$(git diff --name-only --cached; git diff --name-only)"
+          echo "$changed"
+          if echo "$changed" | grep -v -E '^(package-lock\.json|\.github/workflows/build03-lockfile-repair\.yml)$' | grep -q .; then
+            echo "Refusing to commit changes outside the authorized files." >&2
+            exit 1
+          fi
+
+      - name: Commit generated lockfile and remove temporary permission
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add package-lock.json .github/workflows/build03-lockfile-repair.yml
+          git commit -m 'security: regenerate lockfile for js-yaml 4.3.2'
+          git push origin HEAD:feature/build-03-milestone-delta
