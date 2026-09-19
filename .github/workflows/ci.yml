@@ -2,9 +2,10 @@ name: WP-01B Engineering Gates
 
 on:
   push:
-    branches: [main, "fix/wp-01b-engineering-gates"]
+    branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
