@@ -2,7 +2,7 @@ name: Deploy production verification build to GitHub Pages
 
 on:
   push:
-    branches: [main]
+    branches: [main, feature/build-03-milestone-delta]
   workflow_dispatch:
 
 permissions:
@@ -26,10 +26,10 @@ jobs:
       VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_sknzlD0MStONUuCDRSl_gg_f1oS_T5M
     steps:
       - name: Check out source
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: npm
@@ -49,13 +49,18 @@ jobs:
       - name: Production build
         run: npm run build
 
+      - name: Record exact deployment identity
+        shell: bash
+        run: |
+          printf '{"commit":"%s","environment":"production-verification","enrollment":"paused"}\n' "$GITHUB_SHA" > dist/build-metadata.json
+
       - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0
         with:
           enablement: true
 
       - name: Upload GitHub Pages artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
         with:
           path: dist
 
@@ -65,9 +70,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment:
-      name: github-pages
+      # Keep the protected production Pages environment reserved for main.
+      # Build 03 verification deploys from its feature branch into a separate
+      # environment so production protection rules are not weakened.
+      name: ${{ github.ref_name == 'main' && 'github-pages' || 'build-03-pages-verification' }}
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5

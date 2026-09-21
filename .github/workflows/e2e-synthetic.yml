@@ -3,6 +3,8 @@ name: Authenticated synthetic E2E release gate
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -17,10 +19,10 @@ jobs:
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
     steps:
       - name: Check out exact source
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 22
           cache: npm
@@ -55,11 +57,10 @@ jobs:
           fi
           echo "Staging admin credential validated."
 
-      - name: Run deterministic authenticated synthetic journey
+      - name: Run deterministic authenticated Build 03 journey
         run: node scripts/e2e-live.mjs
 
-# Release gate intentionally runs only with an encrypted staging service-role secret.
-# Disposable staging users are service-role seeded and confirmed, then authenticated
-# through the public client. This avoids treating outbound-email quota as application
-# correctness while enrollment is paused; public email delivery requires its own gate
-# before real-user enrollment can be authorized.
+# This gate may run for same-repository pull requests because repository secrets
+# remain unavailable to forks. Disposable staging users are service-role seeded,
+# confirmed, exercised through authenticated public clients under RLS, and then
+# removed. Public enrollment remains paused.
