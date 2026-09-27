@@ -43,13 +43,13 @@ test.describe("Account flow — enrollment paused (current authorized mode)", ()
   test.use({ storageState: { cookies: [], origins: [] } });
 
   test("staging banner is visible and production copy is absent", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("./");
     await expect(page.locator("#environmentBanner")).toHaveText(STAGING_BANNER);
     await expect(page.locator("#environmentBanner")).not.toContainText("PRODUCTION");
   });
 
   test("welcome Create Account control is disabled while enrollment is paused", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("./");
     const entry = page.locator("#signupEntryButton");
     await expect(entry).toBeDisabled();
     await expect(entry).toHaveAttribute(
@@ -59,7 +59,7 @@ test.describe("Account flow — enrollment paused (current authorized mode)", ()
   });
 
   test("signup form cannot be submitted while enrollment is paused", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("./");
     await page.locator("#signupEntryButton").evaluate((button: HTMLButtonElement) => {
       button.disabled = false;
       button.click();
@@ -78,21 +78,21 @@ test.describe("Account flow — enrollment paused (current authorized mode)", ()
       const event = new Event("submit", { cancelable: true, bubbles: true });
       return form.dispatchEvent(event);
     });
-    expect(submitted).toBeTruthy();
+    expect(submitted).toBeFalsy();
     await expect(page.locator("#signupStatus")).toHaveText(ENROLLMENT_PAUSED);
     await expect(page.locator("#verifyPage")).not.toHaveClass(/active/);
     await expect(page.locator("#profileSetupPage")).not.toHaveClass(/active/);
   });
 
   test("Sign In remains available from welcome", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("./");
     await page.getByRole("button", { name: "Sign In" }).click();
     await expectPageActive(page, "loginPage");
     await expect(page.locator("#loginButton")).toBeEnabled();
   });
 
   test("protected pages redirect unauthenticated users to login", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("./");
     await page.evaluate(() => {
       (window as unknown as { navigateTo: (id: string) => void }).navigateTo("dashboardPage");
     });
@@ -105,7 +105,7 @@ test.describe("Account flow — synthetic login (pre-provisioned staging user)",
   test.beforeEach(() => requireSyntheticCreds());
 
   test("pre-provisioned synthetic adult can sign in", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("./");
     await page.getByRole("button", { name: "Sign In" }).click();
     await page.locator("#loginEmail").fill(synthetic.email);
     await page.locator("#loginPassword").fill(synthetic.password);
@@ -118,7 +118,7 @@ test.describe("Account flow — synthetic login (pre-provisioned staging user)",
   });
 
   test("wrong password stays on login and shows an error", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("./");
     await page.getByRole("button", { name: "Sign In" }).click();
     await page.locator("#loginEmail").fill(synthetic.email);
     await page.locator("#loginPassword").fill("IncorrectPassword!999");
@@ -130,7 +130,7 @@ test.describe("Account flow — synthetic login (pre-provisioned staging user)",
   });
 
   test("sign out returns to welcome and hides member navigation", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("./");
     await page.getByRole("button", { name: "Sign In" }).click();
     await page.locator("#loginEmail").fill(synthetic.email);
     await page.locator("#loginPassword").fill(synthetic.password);
@@ -159,7 +159,7 @@ test.describe("Account flow — synthetic signup (enrollment flag ON, synthetic 
     const stamp = Date.now();
     const email = `velvet.synthetic.${stamp}@example.test`;
 
-    await page.goto("/");
+    await page.goto("./");
     await expect(page.locator("#signupEntryButton")).toBeEnabled();
     await page.locator("#signupEntryButton").click();
 
@@ -174,7 +174,7 @@ test.describe("Account flow — synthetic signup (enrollment flag ON, synthetic 
   });
 
   test("signup rejects an invalid email without leaving the form", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("./");
     await page.locator("#signupEntryButton").click();
     await page.locator("#signupName").fill("Invalid Email Case");
     await page.locator("#signupEmail").fill("not-an-email");
@@ -186,7 +186,7 @@ test.describe("Account flow — synthetic signup (enrollment flag ON, synthetic 
 
 test.describe("Account flow — evidence gaps to keep open", () => {
   test("age-assurance control is not present on the current signup form", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("./");
     await page.locator("#signupEntryButton").evaluate((button: HTMLButtonElement) => {
       button.disabled = false;
       button.click();

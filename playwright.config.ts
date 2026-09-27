@@ -15,7 +15,7 @@
  */
 import { defineConfig, devices } from "@playwright/test";
 
-const LOCAL_PREVIEW = "http://127.0.0.1:4173";
+const LOCAL_PREVIEW = "http://127.0.0.1:4173/Velvet-Connect/";
 const requestedBaseURL = process.env.VC_E2E_BASE_URL ?? LOCAL_PREVIEW;
 const allowProductionVerify = process.env.VC_ALLOW_PRODUCTION_VERIFY === "true";
 
@@ -73,13 +73,13 @@ export default defineConfig({
   webServer: process.env.VC_E2E_BASE_URL
     ? undefined
     : {
-        command: "npx vite preview --host 127.0.0.1 --port 4173",
+        command: "npm run build && npm run preview -- --host 127.0.0.1 --port 4173 --strictPort",
         url: LOCAL_PREVIEW,
-        reuseExistingServer: !process.env.CI,
+        reuseExistingServer: false,
         timeout: 60_000,
         env: {
           VITE_APP_ENV: "staging",
-          VITE_ENABLE_ENROLLMENT: allowSyntheticSignup ? "true" : "false",
+          VITE_ENABLE_ENROLLMENT: enrollmentEnabled && allowSyntheticSignup ? "true" : "false",
         },
       },
 
