@@ -29,6 +29,9 @@ jobs:
           node-version: 22
           cache: npm
 
+      - name: Use the repository npm version
+        run: npm install --global npm@11.9.0
+
       - name: Record source and runtime
         run: |
           git rev-parse HEAD
