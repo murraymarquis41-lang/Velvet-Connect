@@ -1,0 +1,62 @@
+name: Enrollment-paused Playwright draft check
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  paused-local-preview:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      VITE_APP_ENV: staging
+      VITE_ENABLE_ENROLLMENT: "false"
+      # Deliberately nonfunctional local configuration: this check needs no staging account.
+      VITE_SUPABASE_URL: https://example.invalid
+      VITE_SUPABASE_PUBLISHABLE_KEY: local-preview-only-key
+    steps:
+      - name: Check out the exact PR head
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Use the repository npm version
+        run: npm install --global npm@11.9.0
+
+      - name: Record source and runtime
+        run: |
+          git rev-parse HEAD
+          node --version
+          npm --version
+
+      - name: Clean dependency installation
+        run: npm ci
+
+      - name: Install browsers and system dependencies
+        run: npm run test:e2e:install
+
+      - name: Record Playwright version
+        run: npx playwright --version
+
+      - name: Test enrollment-paused unauthenticated cases
+        run: npm run test:e2e:account -- --grep "enrollment paused"
+
+      - name: Preserve browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-paused-${{ github.event.pull_request.head.sha }}
+          path: |
+            playwright-report/
+            test-results/
+          if-no-files-found: ignore
+          retention-days: 14
