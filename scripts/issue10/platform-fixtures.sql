@@ -14,7 +14,7 @@ CREATE OR REPLACE FUNCTION auth.uid()
  LANGUAGE sql
  STABLE
 AS $function$
-  select 
+  select
   coalesce(
     nullif(current_setting('request.jwt.claim.sub', true), ''),
     (nullif(current_setting('request.jwt.claims', true), '')::jsonb ->> 'sub')
