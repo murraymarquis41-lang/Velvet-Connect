@@ -74,10 +74,16 @@ Performance advisor:
 - SQL confirms the matching `moderator_roles` row is active with role `ceo`.
 - The invite is not yet email-confirmed and has no first-sign-in timestamp, so
   authenticated human-role QA remains blocked on activation.
-- Clean PostgreSQL replay identified the historical
-  `trust_safety_reporting_triage` delta as `public.admin_diagnostics()`; the
-  forward-only `20260913233000_restore_admin_diagnostics.sql` migration now
-  reproduces the staging function and its least-privilege grants.
+- **Provenance correction (2026-10-03):** the captured historical
+  `20260905182323_trust_safety_reporting_triage` SQL updates report queuing for
+  coercion and sexual-image-abuse reports; it does not create
+  `public.admin_diagnostics()`. Repository commit
+  `e6153f7e54b2dbd17859938cc22838f1b4e8d969` restored the diagnostics function
+  through `20260913233000_restore_admin_diagnostics.sql`. Its body aligns with
+  the captured current staging definition, but its original hosted creation
+  provenance remains unresolved. The September 13 replay used PGlite and is
+  partial compatibility evidence, not full Supabase reconstruction proof.
+  See [corrected reconciliation](docs/issue10/RECONCILIATION.md).
 - A full isolated Supabase branch replay remains unavailable because Supabase
   branching is not supported on the organization's Free plan.
 - Refreshed 2026-09-13 security advisors report six authenticated
