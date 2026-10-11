@@ -1,5 +1,6 @@
 import { createClient, type User } from "@supabase/supabase-js";
 import { isAtLeast18 } from "./enrollment";
+import { EVIDENCE_BUCKET, validateEvidenceFile, evidenceDownloadName } from "./moderation-evidence";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
@@ -99,7 +100,7 @@ function navigateTo(pageId: string): void {
 
   if (pageId === "dashboardPage") void loadProfileCard();
   if (pageId === "chatPage") void renderChat();
-  if (pageId === "settingsPage") void loadAppealableCases();
+  if (pageId === "settingsPage") { void loadAppealableCases(); void loadCaseResponses(); }
   if (pageId === "adminPage") void loadModerationQueue();
 }
 
@@ -316,7 +317,7 @@ async function reportCurrentProfile(): Promise<void> {
   if (currentCardIndex >= discoverableProfiles.length) currentCardIndex = 0;
   element<HTMLTextAreaElement>("reportDetails").value = "";
   renderCurrentCard();
-  setStatus("discoverStatus", "Report submitted for human review. The profile has been disconnected from you.", true);
+  setStatus("discoverStatus", "Report submitted for human review. The profile has been disconnected from you. Add a private case statement in Settings.", true);
 }
 
 async function renderChat(): Promise<void> {
@@ -357,6 +358,9 @@ async function logout(): Promise<void> {
   currentUser = null;
   moderatorAuthorized = false;
   currentSafetyStatus = "active";
+  element<HTMLElement>("caseResponses").replaceChildren();
+  element<HTMLElement>("moderationQueue").replaceChildren();
+  element<HTMLElement>("appealQueue").replaceChildren();
   element<HTMLElement>("adminNav").hidden = true;
   navigateTo("welcomePage");
 }
@@ -380,6 +384,9 @@ async function deleteAccount(): Promise<void> {
   currentUser = null;
   moderatorAuthorized = false;
   currentSafetyStatus = "active";
+  element<HTMLElement>("caseResponses").replaceChildren();
+  element<HTMLElement>("moderationQueue").replaceChildren();
+  element<HTMLElement>("appealQueue").replaceChildren();
   element<HTMLElement>("adminNav").hidden = true;
   navigateTo("welcomePage");
 }
@@ -459,11 +466,7 @@ async function loadModerationQueue(): Promise<void> {
 async function loadPendingAppeals(): Promise<void> {
   const container = element<HTMLElement>("appealQueue");
   container.replaceChildren();
-  const { data, error } = await supabase
-    .from("moderation_appeals")
-    .select("id,case_id,statement,created_at")
-    .eq("status", "pending")
-    .order("created_at", { ascending: true });
+  const { data, error } = await supabase.rpc("list_moderation_appeal_queue");
   if (error) {
     const message = document.createElement("p");
     message.className = "muted";
@@ -475,7 +478,7 @@ async function loadPendingAppeals(): Promise<void> {
     const wrapper = document.createElement("article");
     wrapper.className = "moderation-case";
     const statement = document.createElement("p");
-    statement.textContent = String(appeal.statement);
+    statement.textContent = appeal.statement ? String(appeal.statement) : "Claim independent review to read the private appeal statement.";
     const metadata = document.createElement("p");
     metadata.className = "muted";
     metadata.textContent = `Case ${String(appeal.case_id)} · appeal ${String(appeal.id)}`;
@@ -489,7 +492,18 @@ async function loadPendingAppeals(): Promise<void> {
       button.addEventListener("click", () => void reviewAppeal(String(appeal.id), decision));
       actions.append(button);
     }
-    wrapper.append(statement, metadata, actions);
+    const claim = document.createElement("button");
+    claim.type = "button";
+    claim.className = "btn btn-outline";
+    claim.textContent = "Claim independent review and view material";
+    claim.addEventListener("click", () => void (async () => {
+      const { error } = await supabase.rpc("claim_moderation_appeal", { target_appeal_id: appeal.id });
+      if (error) return setStatus("moderationStatus", error.message);
+      const { data } = await supabase.from("moderation_appeals").select("statement").eq("id", appeal.id).single();
+      statement.textContent = data?.statement ?? "Appeal statement is unavailable.";
+      await showCaseMaterial(String(appeal.case_id), wrapper);
+    })());
+    wrapper.append(statement, metadata, claim, actions);
     container.append(wrapper);
   }
   if (!data?.length) {
@@ -543,7 +557,21 @@ function renderModerationCase(moderationCase: ModerationCase): HTMLElement {
     button.addEventListener("click", () => void applyModerationAction(moderationCase.id, action));
     actions.append(button);
   }
-  wrapper.append(heading, summary, metadata, actions);
+  const request = document.createElement("button");
+  request.type = "button";
+  request.className = "btn btn-outline";
+  request.textContent = "Request neutral member response";
+  request.addEventListener("click", () => void (async () => {
+    if (!window.confirm("Confirm policy permits a pre-decision response without identifying the reporter.")) return;
+    const { error } = await supabase.rpc("request_moderation_case_response", { target_case_id: moderationCase.id });
+    setStatus("moderationStatus", error ? error.message : "Neutral response is available in the member’s Settings.", !error);
+  })());
+  const review = document.createElement("button");
+  review.type = "button";
+  review.className = "btn btn-outline";
+  review.textContent = "Review permitted statements and evidence";
+  review.addEventListener("click", () => void showCaseMaterial(moderationCase.id, wrapper));
+  wrapper.append(heading, summary, metadata, request, review, actions);
   return wrapper;
 }
 
@@ -559,6 +587,153 @@ async function applyModerationAction(caseId: string, action: string): Promise<vo
   if (error) return setStatus("moderationStatus", error.message);
   setStatus("moderationStatus", "Moderation action recorded in the immutable audit log.", true);
   await loadModerationQueue();
+}
+
+
+type CaseResponse = { case_id: string; case_status: string; member_side: string; may_submit: boolean; uploads_enabled: boolean };
+type CaseEvidence = { id: string; object_path: string; mime_type: string; state: string; expires_at: string };
+
+async function loadCaseResponses(): Promise<void> {
+  const container = element<HTMLElement>("caseResponses");
+  container.replaceChildren();
+  if (!currentUser) return;
+  const viewer = currentUser.id;
+  const { data, error } = await supabase.rpc("list_my_moderation_responses");
+  if (currentUser?.id !== viewer) return;
+  if (error) return setStatus("caseResponseStatus", "Case responses are unavailable pending staging preparation.");
+  setStatus("caseResponseStatus", data?.length ? "Your statements remain private from other members." : "No case response is available.", true);
+  for (const item of (data ?? []) as CaseResponse[]) {
+    const wrapper = document.createElement("article");
+    wrapper.className = "moderation-case";
+    const heading = document.createElement("h4");
+    heading.textContent = `Case ${item.case_id.slice(0, 8)} · ${item.case_status.replaceAll("_", " ")}`;
+    const label = document.createElement("label");
+    const input = document.createElement("textarea");
+    input.id = `statement-${item.case_id}`;
+    input.minLength = 10;
+    input.maxLength = 4000;
+    input.rows = 4;
+    input.disabled = !item.may_submit;
+    label.htmlFor = input.id;
+    label.textContent = "Your independent statement (10–4000 characters)";
+    const { data: own } = await supabase.from("moderation_case_statements").select("statement").eq("case_id", item.case_id).eq("author_id", currentUser.id).maybeSingle();
+    if (currentUser?.id !== viewer) return;
+    input.value = own?.statement ?? "";
+    const save = document.createElement("button");
+    save.type = "button";
+    save.className = "btn btn-outline";
+    save.textContent = "Save private statement";
+    save.disabled = !item.may_submit;
+    const status = document.createElement("p");
+    status.setAttribute("role", "status");
+    save.addEventListener("click", () => void (async () => {
+      if (input.value.trim().length < 10) { status.textContent = "Provide at least 10 characters."; return; }
+      save.disabled = true;
+      try {
+        const { error } = await supabase.rpc("submit_moderation_case_statement", { target_case_id: item.case_id, member_statement: input.value.trim() });
+        status.textContent = error ? "Statement could not be saved. Refresh and try again." : "Private statement saved for human review.";
+      } finally { save.disabled = !item.may_submit; }
+    })());
+    const fileLabel = document.createElement("label");
+    const upload = document.createElement("input");
+    upload.id = `evidence-${item.case_id}`;
+    upload.type = "file";
+    upload.accept = "image/png,image/jpeg";
+    upload.disabled = !item.may_submit || !item.uploads_enabled;
+    fileLabel.htmlFor = upload.id;
+    fileLabel.textContent = item.uploads_enabled ? "Optional PNG/JPEG screenshot, up to 5 MiB. Remove unrelated personal details first." : "Evidence uploads are awaiting privacy review and activation.";
+    upload.addEventListener("change", () => void (async () => {
+      const file = upload.files?.[0];
+      if (!file) return;
+      const validation = validateEvidenceFile(file);
+      if (validation) { status.textContent = validation; upload.value = ""; return; }
+      upload.disabled = true;
+      try {
+        const { data, error } = await supabase.rpc("reserve_moderation_evidence", { target_case_id: item.case_id, evidence_mime: file.type, evidence_size: file.size });
+        if (error) throw error;
+        const reservation = data as CaseEvidence;
+        const result = await supabase.storage.from(EVIDENCE_BUCKET).upload(reservation.object_path, file, { upsert: false, contentType: file.type, cacheControl: "0" });
+        if (result.error) throw result.error;
+        const finalized = await supabase.rpc("finalize_moderation_evidence", { evidence_id: reservation.id });
+        if (finalized.error) throw finalized.error;
+        status.textContent = "Evidence submitted for authorized human review.";
+        await showEvidence(item.case_id, evidenceList, true);
+      } catch { status.textContent = "Evidence upload could not be completed. Refresh before trying again."; }
+      finally { upload.value = ""; upload.disabled = !item.may_submit || !item.uploads_enabled; }
+    })());
+    const evidenceList = document.createElement("div");
+    wrapper.append(heading, label, input, save, fileLabel, upload, status, evidenceList);
+    container.append(wrapper);
+    await showEvidence(item.case_id, evidenceList, true);
+  }
+}
+
+async function showEvidence(caseId: string, container: HTMLElement, ownOnly = false): Promise<void> {
+  container.replaceChildren();
+  if (!currentUser) return;
+  const viewer = currentUser.id;
+  let query = supabase.from("moderation_evidence").select("id,object_path,mime_type,state,expires_at").eq("case_id", caseId);
+  if (ownOnly) query = query.eq("author_id", currentUser.id);
+  const { data, error } = await query;
+  if (currentUser?.id !== viewer) return;
+  if (error) { container.textContent = "Evidence is unavailable pending staging preparation."; return; }
+  for (const item of (data ?? []) as CaseEvidence[]) {
+    const row = document.createElement("p");
+    const info = document.createElement("span");
+    info.textContent = `Attachment · ${item.state} · retained until ${new Date(item.expires_at).toLocaleDateString()} `;
+    const download = document.createElement("button");
+    download.type = "button";
+    download.className = "btn btn-outline";
+    download.textContent = "Download permitted evidence";
+    download.disabled = item.state !== "ready";
+    download.addEventListener("click", () => void (async () => {
+      // Authenticated download re-evaluates RLS; never create a bearer signed URL.
+      const { data: blob, error } = await supabase.storage.from(EVIDENCE_BUCKET).download(item.object_path);
+      if (currentUser?.id !== viewer) return;
+      if (error || !blob) { info.textContent = "Evidence is unavailable or access has changed."; return; }
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = evidenceDownloadName(item.mime_type);
+      link.click();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    })());
+    row.append(info, download);
+    if (ownOnly) {
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "btn btn-outline";
+      remove.textContent = "Delete evidence";
+      remove.addEventListener("click", () => void (async () => {
+        const { error } = await supabase.rpc("request_moderation_evidence_deletion", { evidence_id: item.id });
+        if (error) { info.textContent = "Evidence deletion could not be requested."; return; }
+        await showEvidence(caseId, container, true);
+      })());
+      row.append(remove);
+    }
+    container.append(row);
+  }
+}
+
+async function showCaseMaterial(caseId: string, wrapper: HTMLElement): Promise<void> {
+  wrapper.querySelector(".case-material")?.remove();
+  const section = document.createElement("div");
+  section.className = "case-material";
+  wrapper.append(section);
+  const viewer = currentUser?.id;
+  if (!viewer) return;
+  const { data, error } = await supabase.from("moderation_case_statements").select("author_side,statement").eq("case_id", caseId);
+  if (currentUser?.id !== viewer) return;
+  if (error) { section.textContent = "Case material is unavailable."; return; }
+  if (!data?.length) section.textContent = "No retained statements are visible. Claim the case or independent appeal review to access permitted material.";
+  for (const statement of data ?? []) {
+    const paragraph = document.createElement("p");
+    paragraph.textContent = `${statement.author_side}: ${statement.statement}`;
+    section.append(paragraph);
+  }
+  const evidence = document.createElement("div");
+  section.append(evidence);
+  await showEvidence(caseId, evidence);
 }
 
 async function initialize(): Promise<void> {
@@ -614,5 +789,7 @@ Object.assign(window, {
   deleteAccount,
   submitAppeal,
   loadModerationQueue,
+  loadCaseResponses,
 });
 void initialize();
+

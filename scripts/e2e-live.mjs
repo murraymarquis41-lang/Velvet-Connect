@@ -207,6 +207,12 @@ async function run() {
   });
   assert(Boolean(selfReviewError), "original case assignee was able to review the appeal");
 
+  // Compatibility baseline: new issue17 deployments require an explicit
+  // independent claim. Only a missing legacy RPC may use the older baseline.
+  // Complete issue17 proof is always the separate fail-closed live suite.
+  const { error: claimAppealError } = await clients.reviewer.rpc("claim_moderation_appeal", { target_appeal_id: appealId });
+  if (claimAppealError && claimAppealError.code !== "PGRST202") throw new Error("independent appeal claim failed");
+  console.log(claimAppealError ? "Legacy staging baseline; issue17 full flow remains untested" : "Independent appeal claim succeeded");
   const { error: independentReviewError } = await clients.reviewer.rpc("review_moderation_appeal", {
     target_appeal_id: appealId,
     decision: "overturned",
@@ -342,3 +348,4 @@ if (cleanupFailures.length > 0) {
 }
 if (runFailure) throw runFailure;
 console.log("SYNTHETIC CLEANUP PASS");
+
