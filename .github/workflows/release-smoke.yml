@@ -26,7 +26,7 @@ jobs:
                 curl -fsSL "${ORIGIN}${ASSET}" -o /tmp/velvet.js
                 if grep -q "Velvet Connect" /tmp/velvet.html \
                   && grep -q "PRODUCTION VERIFICATION · ENROLLMENT PAUSED" /tmp/velvet.js \
-                  && grep -q "https://rrtxdzwfudlqbcticmlp.supabase.co" /tmp/velvet.js \
+                  && grep -q "https://qqintbwoalvoegvqoxlo.supabase.co" /tmp/velvet.js \
                   && grep -q "\"commit\":\"${GITHUB_SHA}\"" /tmp/build-metadata.json \
                   && grep -q "\"enrollment\":\"paused\"" /tmp/build-metadata.json; then
                   echo "Exact-SHA public verification surface passed: $URL"
@@ -41,16 +41,18 @@ jobs:
           echo "Expected exact-SHA Velvet Connect verification content was not observed at $URL" >&2
           exit 1
 
+      # The former verification project rrtxdzwfudlqbcticmlp no longer resolves.
+      # This gate uses the live staging project and its committed publishable key.
       - name: Verify Supabase Auth service health
         shell: bash
         env:
-          SUPABASE_PUBLISHABLE_KEY: sb_publishable_sknzlD0MStONUuCDRSl_gg_f1oS_T5M
+          SUPABASE_PUBLISHABLE_KEY: sb_publishable_HuzOX6mv9QBruN_8Ct3n6Q_CFNrt4pe
         run: |
           set -euo pipefail
           curl -fsS \
             -H "apikey: ${SUPABASE_PUBLISHABLE_KEY}" \
             -H "Authorization: Bearer ${SUPABASE_PUBLISHABLE_KEY}" \
-            "https://rrtxdzwfudlqbcticmlp.supabase.co/auth/v1/health" \
+            "https://qqintbwoalvoegvqoxlo.supabase.co/auth/v1/health" \
             -o /tmp/auth-health.json
           grep -q '"name":"GoTrue"' /tmp/auth-health.json
           cat /tmp/auth-health.json
@@ -58,13 +60,13 @@ jobs:
       - name: Verify Supabase REST key and anonymous RLS protection
         shell: bash
         env:
-          SUPABASE_PUBLISHABLE_KEY: sb_publishable_sknzlD0MStONUuCDRSl_gg_f1oS_T5M
+          SUPABASE_PUBLISHABLE_KEY: sb_publishable_HuzOX6mv9QBruN_8Ct3n6Q_CFNrt4pe
         run: |
           set -euo pipefail
           STATUS=$(curl -sS -o /tmp/profiles.json -w "%{http_code}" \
             -H "apikey: ${SUPABASE_PUBLISHABLE_KEY}" \
             -H "Authorization: Bearer ${SUPABASE_PUBLISHABLE_KEY}" \
-            "https://rrtxdzwfudlqbcticmlp.supabase.co/rest/v1/profiles?select=id&limit=1")
+            "https://qqintbwoalvoegvqoxlo.supabase.co/rest/v1/profiles?select=id&limit=1")
           BODY=$(tr -d '[:space:]' < /tmp/profiles.json)
           echo "Profiles probe HTTP status: $STATUS"
           if [ "$STATUS" = "200" ]; then

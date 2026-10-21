@@ -22,8 +22,8 @@ jobs:
     env:
       VITE_APP_ENV: production
       VITE_ENABLE_ENROLLMENT: "false"
-      VITE_SUPABASE_URL: https://rrtxdzwfudlqbcticmlp.supabase.co
-      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_sknzlD0MStONUuCDRSl_gg_f1oS_T5M
+      VITE_SUPABASE_URL: https://qqintbwoalvoegvqoxlo.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_HuzOX6mv9QBruN_8Ct3n6Q_CFNrt4pe
     steps:
       - name: Check out source
         uses: actions/checkout@v5
