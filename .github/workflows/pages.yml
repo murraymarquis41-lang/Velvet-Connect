@@ -26,13 +26,14 @@ jobs:
       VITE_SUPABASE_PUBLISHABLE_KEY: sb_publishable_sknzlD0MStONUuCDRSl_gg_f1oS_T5M
     steps:
       - name: Check out source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
+          package-manager-cache: false
 
       - name: Clean dependency installation
         run: npm ci

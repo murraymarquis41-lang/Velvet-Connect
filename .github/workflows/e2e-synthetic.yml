@@ -19,13 +19,14 @@ jobs:
       SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
     steps:
       - name: Check out exact source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
+          package-manager-cache: false
 
       - name: Require encrypted staging admin credential
         shell: bash
