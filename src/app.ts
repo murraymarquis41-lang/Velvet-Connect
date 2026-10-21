@@ -565,6 +565,12 @@ async function initialize(): Promise<void> {
   applyEnvironment();
   element<HTMLFormElement>("signupForm").addEventListener("submit", (event) => void signUp(event as SubmitEvent));
   element<HTMLFormElement>("loginForm").addEventListener("submit", (event) => void login(event as SubmitEvent));
+  document.querySelectorAll<HTMLAnchorElement>(".verify-qr a").forEach((link) => {
+    link.addEventListener("click", () => {
+      if (currentUser) return;
+      navigateTo(new URL(link.href).hash === "#enroll" ? "signupPage" : "welcomePage");
+    });
+  });
   window.addEventListener("hashchange", () => {
     if (!currentUser && window.location.hash === "#enroll") navigateTo("signupPage");
   });

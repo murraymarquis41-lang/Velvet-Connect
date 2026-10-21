@@ -29,7 +29,8 @@ describe("authoritative static prototype", () => {
     expect(html).toContain("./enrollment-qr.svg");
     expect(html).toContain("./verification-qr.svg");
     expect(html).toContain("./logo.png");
-    expect(html).toContain('href="./#enroll"');
+    expect(html).toContain('href="https://murraymarquis41-lang.github.io/Velvet-Connect/#enroll"');
+    expect(html).toContain("pointer-events: none");
     expect(html).not.toContain("password:'123456'");
   });
 

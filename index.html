@@ -29,14 +29,20 @@
     .welcome::after { right: 0; background: radial-gradient(circle at right, rgba(92,18,36,.9), transparent 72%); }
     .lockup { position: relative; }
     .brand-logo { display: block; width: 148px; height: 148px; margin: 0 auto 18px; }
-    .verify-qr a { display: block; border-radius: 12px; }
+    .verify-qr { position: relative; z-index: 1; width: fit-content; margin: 28px auto 0; }
+    .verify-qr a {
+      display: block;
+      border-radius: 12px;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: rgba(231, 199, 164, 0.35);
+    }
+    .verify-qr a:active { transform: scale(0.96); }
     .verify-qr a:focus-visible { outline: 2px solid #e7c7a4; outline-offset: 4px; }
+    .verify-qr img { display: block; width: 168px; height: 168px; border-radius: 12px; background: #f6efe8; pointer-events: none; }
+    .verify-qr figcaption { margin-top: 10px; color: #e7c7a4; font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; }
     .welcome h1 { margin: 10px 0 0; font-family: Georgia, serif; font-weight: 500; letter-spacing: .12em; font-size: clamp(1.7rem, 6vw, 2.4rem); }
     .welcome .tagline { margin: 16px 0 0; color: #e7c7a4; font-family: Georgia, serif; font-style: italic; }
     .welcome .paused { margin: 22px 0 0; color: #e7c7a4; font-size: .78rem; letter-spacing: .22em; text-transform: uppercase; }
-    .verify-qr { position: relative; width: fit-content; margin: 28px auto 0; }
-    .verify-qr img { display: block; width: 168px; height: 168px; border-radius: 12px; background: #f6efe8; }
-    .verify-qr figcaption { margin-top: 10px; color: #e7c7a4; font-size: .72rem; letter-spacing: .16em; text-transform: uppercase; }
     .welcome .actions { margin-top: 24px; }
     h1 { margin: 12px 0; font-size: clamp(2.2rem, 8vw, 3.2rem); }
     h2 { margin: 0 0 24px; }
@@ -81,20 +87,20 @@
         <p class="tagline">Intentional connections. Meaningful possibilities.</p>
       </div>
       <figure class="verify-qr">
-        <a href="./">
+        <a href="https://murraymarquis41-lang.github.io/Velvet-Connect/">
           <img src="./verification-qr.svg" width="168" height="168" alt="QR code linking to the Velvet Connect verification page">
+          <figcaption>Tap or scan to open this page</figcaption>
         </a>
-        <figcaption>Tap or scan to open this page</figcaption>
       </figure>
       <div class="actions"><button class="btn" id="signupEntryButton" type="button" onclick="navigateTo('signupPage')" disabled>Create Account</button><button class="btn btn-outline" type="button" onclick="navigateTo('loginPage')">Sign In</button></div>
     </section>
     <section class="page" id="signupPage">
       <h2 id="signupHeading">Create an account</h2>
       <figure class="verify-qr">
-        <a href="./#enroll">
+        <a href="https://murraymarquis41-lang.github.io/Velvet-Connect/#enroll">
           <img src="./enrollment-qr.svg" width="168" height="168" alt="QR code linking to the Velvet Connect enrollment page">
+          <figcaption>Tap or scan to open this page</figcaption>
         </a>
-        <figcaption>Tap or scan to open this page</figcaption>
       </figure>
       <form class="glass" id="signupForm">
         <div class="input-group"><label for="signupName">Display name</label><input id="signupName" minlength="2" maxlength="60" autocomplete="name" required></div>
