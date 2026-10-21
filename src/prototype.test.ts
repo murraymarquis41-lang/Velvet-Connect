@@ -27,6 +27,9 @@ describe("authoritative static prototype", () => {
     expect(html).toContain('id="environmentBanner"');
     expect(html).toContain('id="signupEntryButton"');
     expect(html).toContain("./enrollment-qr.svg");
+    expect(html).toContain("./verification-qr.svg");
+    expect(html).toContain("./logo.png");
+    expect(html).toContain('href="./#enroll"');
     expect(html).not.toContain("password:'123456'");
   });
 

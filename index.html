@@ -28,7 +28,9 @@
     .welcome::before { left: 0; background: radial-gradient(circle at left, rgba(92,18,36,.9), transparent 72%); }
     .welcome::after { right: 0; background: radial-gradient(circle at right, rgba(92,18,36,.9), transparent 72%); }
     .lockup { position: relative; }
-    .monogram { display: grid; width: 92px; height: 92px; margin: 0 auto 22px; place-items: center; border: 1px solid rgba(196,164,132,.85); border-radius: 50%; color: #e7c7a4; font-family: Georgia, serif; font-size: 1.7rem; }
+    .brand-logo { display: block; width: 148px; height: 148px; margin: 0 auto 18px; }
+    .verify-qr a { display: block; border-radius: 12px; }
+    .verify-qr a:focus-visible { outline: 2px solid #e7c7a4; outline-offset: 4px; }
     .welcome h1 { margin: 10px 0 0; font-family: Georgia, serif; font-weight: 500; letter-spacing: .12em; font-size: clamp(1.7rem, 6vw, 2.4rem); }
     .welcome .tagline { margin: 16px 0 0; color: #e7c7a4; font-family: Georgia, serif; font-style: italic; }
     .welcome .paused { margin: 22px 0 0; color: #e7c7a4; font-size: .78rem; letter-spacing: .22em; text-transform: uppercase; }
@@ -73,22 +75,26 @@
   <main class="app-container" id="appContainer">
     <section class="page active welcome" id="welcomePage">
       <div class="lockup">
-        <div class="monogram" aria-hidden="true">VC</div>
+        <img class="brand-logo" src="./logo.png" width="148" height="148" alt="">
         <p class="paused">Enrollment paused</p>
         <h1>VELVET CONNECT</h1>
         <p class="tagline">Intentional connections. Meaningful possibilities.</p>
       </div>
       <figure class="verify-qr">
-        <img src="./verification-qr.svg" width="168" height="168" alt="QR code linking to the Velvet Connect verification page">
-        <figcaption>Scan to open this page</figcaption>
+        <a href="./">
+          <img src="./verification-qr.svg" width="168" height="168" alt="QR code linking to the Velvet Connect verification page">
+        </a>
+        <figcaption>Tap or scan to open this page</figcaption>
       </figure>
       <div class="actions"><button class="btn" id="signupEntryButton" type="button" onclick="navigateTo('signupPage')" disabled>Create Account</button><button class="btn btn-outline" type="button" onclick="navigateTo('loginPage')">Sign In</button></div>
     </section>
     <section class="page" id="signupPage">
       <h2 id="signupHeading">Create an account</h2>
       <figure class="verify-qr">
-        <img src="./enrollment-qr.svg" width="168" height="168" alt="QR code linking to the Velvet Connect enrollment page">
-        <figcaption>Scan to open this page</figcaption>
+        <a href="./#enroll">
+          <img src="./enrollment-qr.svg" width="168" height="168" alt="QR code linking to the Velvet Connect enrollment page">
+        </a>
+        <figcaption>Tap or scan to open this page</figcaption>
       </figure>
       <form class="glass" id="signupForm">
         <div class="input-group"><label for="signupName">Display name</label><input id="signupName" minlength="2" maxlength="60" autocomplete="name" required></div>
