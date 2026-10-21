@@ -565,9 +565,16 @@ async function initialize(): Promise<void> {
   applyEnvironment();
   element<HTMLFormElement>("signupForm").addEventListener("submit", (event) => void signUp(event as SubmitEvent));
   element<HTMLFormElement>("loginForm").addEventListener("submit", (event) => void login(event as SubmitEvent));
+  window.addEventListener("hashchange", () => {
+    if (!currentUser && window.location.hash === "#enroll") navigateTo("signupPage");
+  });
+  if (window.location.hash === "#enroll") navigateTo("signupPage");
   const { data } = await supabase.auth.getUser();
   currentUser = data.user;
-  if (!currentUser) return navigateTo("welcomePage");
+  if (!currentUser) {
+    navigateTo(window.location.hash === "#enroll" ? "signupPage" : "welcomePage");
+    return;
+  }
   try {
     const profile = await loadOwnProfile();
     currentSafetyStatus = profile.safety_status;
