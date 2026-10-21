@@ -1,0 +1,108 @@
+name: Exact-SHA Netlify Evidence Deploy
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  exact-sha-evidence:
+    runs-on: ubuntu-latest
+    env:
+      AUTHORIZED_SHA: c174bc3547aea3b57f685cbce1cd7320a5ec4444
+      NETLIFY_SITE_ID: 113d102f-0aff-42d3-afe0-f74bfdb1969f
+      VITE_APP_ENV: staging
+      VITE_ENABLE_ENROLLMENT: "false"
+      VITE_SUPABASE_URL: https://qqintbwoalvoegvqoxlo.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
+      NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+
+    steps:
+      - name: Checkout authorized exact SHA
+        uses: actions/checkout@v4
+        with:
+          ref: c174bc3547aea3b57f685cbce1cd7320a5ec4444
+          persist-credentials: false
+
+      - name: Verify exact SHA after checkout
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$AUTHORIZED_SHA"
+          echo "authorized_sha=$AUTHORIZED_SHA" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Verify approved staging configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$VITE_APP_ENV" = "staging"
+          test "$VITE_ENABLE_ENROLLMENT" = "false"
+          test "$VITE_SUPABASE_URL" = "https://qqintbwoalvoegvqoxlo.supabase.co"
+          test "$NETLIFY_SITE_ID" = "113d102f-0aff-42d3-afe0-f74bfdb1969f"
+          test -n "${VITE_SUPABASE_PUBLISHABLE_KEY:-}"
+          test -n "${NETLIFY_AUTH_TOKEN:-}"
+          echo "environment=staging" >> "$GITHUB_STEP_SUMMARY"
+          echo "enrollment=false" >> "$GITHUB_STEP_SUMMARY"
+          echo "supabase_project=qqintbwoalvoegvqoxlo" >> "$GITHUB_STEP_SUMMARY"
+          echo "netlify_site_id=$NETLIFY_SITE_ID" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Verify SHA before build
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$AUTHORIZED_SHA"
+
+      - name: Build staging artifact
+        run: npm run build
+
+      - name: Generate SHA-256 artifact evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -d dist
+          find dist -type f -print0 | sort -z | xargs -0 sha256sum > dist-file-sha256.txt
+          sha256sum dist-file-sha256.txt > dist-manifest-sha256.txt
+          cat dist-manifest-sha256.txt >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Preserve artifact evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: exact-sha-netlify-evidence
+          path: |
+            dist-file-sha256.txt
+            dist-manifest-sha256.txt
+          if-no-files-found: error
+
+      - name: Final fail-closed pre-deploy gate
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$AUTHORIZED_SHA"
+          test "$VITE_APP_ENV" = "staging"
+          test "$VITE_ENABLE_ENROLLMENT" = "false"
+          test "$VITE_SUPABASE_URL" = "https://qqintbwoalvoegvqoxlo.supabase.co"
+          test "$NETLIFY_SITE_ID" = "113d102f-0aff-42d3-afe0-f74bfdb1969f"
+          test -s dist-manifest-sha256.txt
+          test -n "${VITE_SUPABASE_PUBLISHABLE_KEY:-}"
+          test -n "${NETLIFY_AUTH_TOKEN:-}"
+
+      - name: Deploy one Netlify draft
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx --yes netlify-cli deploy \
+            --dir=dist \
+            --site="$NETLIFY_SITE_ID" \
+            --message="Exact-SHA evidence $AUTHORIZED_SHA" \
+            --json | tee netlify-deploy.json
+          node -e 'const fs=require("fs"); const d=JSON.parse(fs.readFileSync("netlify-deploy.json","utf8")); console.log(`deploy_id=${d.deploy_id||d.deployId||"unavailable"}`); console.log(`deploy_url=${d.deploy_url||d.deployUrl||"unavailable"}`);' >> "$GITHUB_STEP_SUMMARY"

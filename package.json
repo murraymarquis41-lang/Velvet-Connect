@@ -13,10 +13,14 @@
     "lint": "eslint . && html-validate index.html",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "build": "vite build"
+    "build": "vite build",
+    "test:e2e": "playwright test",
+    "test:e2e:account": "playwright test e2e/account-flow.spec.ts",
+    "test:e2e:install": "playwright install --with-deps chromium webkit"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
+    "@playwright/test": "^1.55.1",
     "@types/node": "^26.3.0",
     "eslint": "^9.39.5",
     "html-validate": "^11.10.0",

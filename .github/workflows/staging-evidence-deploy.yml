@@ -1,0 +1,85 @@
+name: Staging exact-SHA evidence build
+
+# PREPARATION ONLY: no deployment/upload step is configured.
+# Execution requires separate Founder authorization.
+on:
+  workflow_dispatch:
+    inputs:
+      source_sha:
+        description: "Exact authorized 40-character SHA"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  staging-evidence:
+    runs-on: ubuntu-24.04
+    env:
+      VITE_APP_ENV: staging
+      VITE_ENABLE_ENROLLMENT: "false"
+      VITE_SUPABASE_URL: https://qqintbwoalvoegvqoxlo.supabase.co
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.VITE_SUPABASE_PUBLISHABLE_KEY }}
+
+    steps:
+      - name: Validate authorized SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${{ inputs.source_sha }}" = "c174bc3547aea3b57f685cbce1cd7320a5ec4444"
+
+      - name: Check out exact authorized source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_sha }}
+
+      - name: Verify checkout identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          ACTUAL_SHA="$(git rev-parse HEAD)"
+          test "$ACTUAL_SHA" = "${{ inputs.source_sha }}"
+          echo "SOURCE_SHA=$ACTUAL_SHA" >> "$GITHUB_ENV"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Automated tests
+        run: npm test
+
+      - name: Build staging artifact
+        run: npm run build
+
+      - name: Record evidence manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          {
+            echo "source_sha=$SOURCE_SHA"
+            echo "environment=staging"
+            echo "enrollment=false"
+            echo "supabase_project_ref=qqintbwoalvoegvqoxlo"
+            echo "github_run_id=$GITHUB_RUN_ID"
+            echo "github_run_attempt=$GITHUB_RUN_ATTEMPT"
+            echo "repository=$GITHUB_REPOSITORY"
+            echo "build_result=success"
+            echo "deployment_id=NOT_EXECUTED"
+            echo "staging_url=NOT_ESTABLISHED"
+            echo "timestamp=$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          } > staging-evidence.txt
+
+      - name: Stop before deployment
+        run: echo "Evidence build complete. Deployment is intentionally not configured or authorized."
