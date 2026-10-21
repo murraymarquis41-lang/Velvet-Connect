@@ -3,19 +3,35 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Velvet Connect – Luxury Dating</title>
-  <meta name="theme-color" content="#0a0015">
+  <title>Velvet Connect</title>
+  <meta name="description" content="Intentional connections. Meaningful possibilities. Enrollment is paused.">
+  <meta name="theme-color" content="#14080c">
+  <meta property="og:title" content="Velvet Connect">
+  <meta property="og:description" content="Intentional connections. Meaningful possibilities. Enrollment is paused.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://murraymarquis41-lang.github.io/Velvet-Connect/og.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Velvet Connect">
+  <meta name="twitter:description" content="Intentional connections. Meaningful possibilities. Enrollment is paused.">
+  <meta name="twitter:image" content="https://murraymarquis41-lang.github.io/Velvet-Connect/og.jpg">
   <style>
     * { box-sizing: border-box; }
-    body { margin: 0; min-height: 100vh; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: #0a0015; color: #fff; }
+    body { margin: 0; min-height: 100vh; font-family: Inter, ui-sans-serif, system-ui, sans-serif; background: #070406; color: #f6efe8; }
     button, input, textarea, select { font: inherit; }
-    .environment-banner { background: #5b1738; padding: 8px 16px; text-align: center; font-size: .78rem; letter-spacing: .08em; }
+    .environment-banner { background: #3d1020; padding: 8px 16px; text-align: center; font-size: .78rem; letter-spacing: .08em; }
     .app-container { max-width: 560px; min-height: calc(100vh - 32px); margin: 0 auto; }
     .page { display: none; min-height: 100%; padding: 32px 20px 110px; }
     .page.active { display: block; animation: reveal .25s ease; }
     @keyframes reveal { from { opacity: 0; transform: translateY(10px); } }
-    .welcome { padding-top: 14vh; text-align: center; }
-    .mark { font-size: 5rem; color: #ff2f8b; }
+    .welcome { position: relative; overflow: hidden; padding-top: 10vh; text-align: center; }
+    .welcome::before, .welcome::after { content: ""; position: absolute; top: 0; bottom: 0; width: 18%; pointer-events: none; }
+    .welcome::before { left: 0; background: radial-gradient(circle at left, rgba(92,18,36,.9), transparent 72%); }
+    .welcome::after { right: 0; background: radial-gradient(circle at right, rgba(92,18,36,.9), transparent 72%); }
+    .lockup { position: relative; }
+    .monogram { display: grid; width: 92px; height: 92px; margin: 0 auto 22px; place-items: center; border: 1px solid rgba(196,164,132,.85); border-radius: 50%; color: #e7c7a4; font-family: Georgia, serif; font-size: 1.7rem; }
+    .welcome h1 { margin: 10px 0 0; font-family: Georgia, serif; font-weight: 500; letter-spacing: .12em; font-size: clamp(1.7rem, 6vw, 2.4rem); }
+    .welcome .tagline { margin: 16px 0 0; color: #e7c7a4; font-family: Georgia, serif; font-style: italic; }
+    .welcome .paused { margin: 22px 0 0; color: #e7c7a4; font-size: .78rem; letter-spacing: .22em; text-transform: uppercase; }
     h1 { margin: 12px 0; font-size: clamp(2.2rem, 8vw, 3.2rem); }
     h2 { margin: 0 0 24px; }
     .muted { color: #b6aebc; }
@@ -52,8 +68,13 @@
   <div class="environment-banner" id="environmentBanner">ENVIRONMENT CHECK</div>
   <main class="app-container" id="appContainer">
     <section class="page active welcome" id="welcomePage">
-      <div class="mark" aria-hidden="true">♥</div><h1>Velvet Connect</h1><p class="muted">Luxury Dating for Discerning Hearts</p>
-      <div class="actions"><button class="btn" id="signupEntryButton" type="button" onclick="navigateTo('signupPage')">Create Account</button><button class="btn btn-outline" type="button" onclick="navigateTo('loginPage')">Sign In</button></div>
+      <div class="lockup">
+        <div class="monogram" aria-hidden="true">VC</div>
+        <p class="paused">Enrollment paused</p>
+        <h1>VELVET CONNECT</h1>
+        <p class="tagline">Intentional connections. Meaningful possibilities.</p>
+      </div>
+      <div class="actions"><button class="btn" id="signupEntryButton" type="button" onclick="navigateTo('signupPage')" disabled>Create Account</button><button class="btn btn-outline" type="button" onclick="navigateTo('loginPage')">Sign In</button></div>
     </section>
     <section class="page" id="signupPage">
       <h2 id="signupHeading">Create an account</h2>
