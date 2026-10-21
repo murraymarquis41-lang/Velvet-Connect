@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
+import { isAtLeast18 } from "./enrollment";
 
 const expectedScreens = [
   "welcomePage",
@@ -11,6 +12,7 @@ const expectedScreens = [
   "matchPage",
   "chatPage",
   "settingsPage",
+  "adminPage",
 ];
 
 describe("authoritative static prototype", () => {
@@ -39,6 +41,36 @@ describe("authoritative static prototype", () => {
     expect(app).toContain("VITE_SUPABASE_URL");
     expect(app).toContain("VITE_SUPABASE_PUBLISHABLE_KEY");
     expect(app).toContain("VITE_ENABLE_ENROLLMENT");
+    expect(app).toContain('rpc("delete_own_account"');
+    expect(app).toContain('rpc("moderate_case"');
+    expect(app).toContain('rpc("review_moderation_appeal"');
+    expect(app).toContain('rpc("submit_moderation_appeal"');
+    expect(app).toContain('.from("reports").insert');
     expect(app).not.toContain("https://qqintbwoalvoegvqoxlo.supabase.co");
+  });
+
+  it("enforces the 18+ enrollment boundary", () => {
+    const now = new Date("2026-08-31T12:00:00Z");
+
+    expect(isAtLeast18("2008-08-31", now)).toBe(true);
+    expect(isAtLeast18("2008-09-01", now)).toBe(false);
+    expect(isAtLeast18("2027-01-01", now)).toBe(false);
+    expect(isAtLeast18("not-a-date", now)).toBe(false);
+  });
+
+  it("commits the Build 03 safety and deletion migration", async () => {
+    const migration = await readFile(
+      new URL("../supabase/migrations/20260831000100_build_03_moderation_enrollment_deletion.sql", import.meta.url),
+      "utf8",
+    );
+
+    expect(migration).toContain("profiles_adult_enrollment_check");
+    expect(migration).toContain("moderation_actions_immutable");
+    expect(migration).toContain("CEO authorization required for permanent action");
+    expect(migration).toContain("Appeal requires a reviewer other than the original case assignee");
+    expect(migration).toContain("delete from auth.sessions where user_id = account_id");
+    expect(migration).toContain("delete from auth.users where id = account_id");
+    expect(migration).not.toContain("delete from storage.objects");
+    expect(migration).toContain("alter table public.moderation_cases force row level security");
   });
 });
