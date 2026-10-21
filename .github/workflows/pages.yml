@@ -17,7 +17,7 @@ concurrency:
 jobs:
   verify-and-build:
     name: Verify and build production configuration
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
       VITE_APP_ENV: production
@@ -68,7 +68,7 @@ jobs:
   deploy:
     name: Deploy to GitHub Pages
     needs: verify-and-build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     environment:
       # Keep the protected production Pages environment reserved for main.
