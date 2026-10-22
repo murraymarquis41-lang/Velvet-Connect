@@ -21,6 +21,8 @@ const clients = {
   ceo: createClient(SUPABASE_URL, PUBLISHABLE_KEY, clientOptions),
   reviewer: createClient(SUPABASE_URL, PUBLISHABLE_KEY, clientOptions),
   deletion: createClient(SUPABASE_URL, PUBLISHABLE_KEY, clientOptions),
+  subject: createClient(SUPABASE_URL, PUBLISHABLE_KEY, clientOptions),
+  secondCeo: createClient(SUPABASE_URL, PUBLISHABLE_KEY, clientOptions),
 };
 
 const createdUserIds = [];
@@ -235,6 +237,88 @@ async function run() {
   const { data: deletedProfiles, error: deletedProfileError } = await admin.from("profiles").select("id").eq("id", deletionUser.id);
   if (deletedProfileError) throw new Error(`deleted profile verification failed: ${deletedProfileError.message}`);
   assert(deletedProfiles?.length === 0, "deleted account retained a profile row");
+
+  console.log("E2E 13: open moderation case holds account deletion");
+  const subjectUser = await seedSyntheticUser(clients.subject, "subject", "E2E Permanent Subject");
+  const secondCeoUser = await seedSyntheticUser(clients.secondCeo, "ceo2", "E2E Second CEO");
+  await createOwnProfile(clients.subject, subjectUser, "E2E Permanent Subject", "Synthetic permanent-action subject", ["safety"]);
+  await createOwnProfile(clients.secondCeo, secondCeoUser, "E2E Second CEO", "Synthetic second CEO profile", ["safety"]);
+  await provisionSyntheticModerator(secondCeoUser.id, "ceo", ceoUser.id);
+
+  const { data: heldReport, error: heldReportError } = await clients.memberA.from("reports").insert({
+    reporter_id: userA.id,
+    reported_id: subjectUser.id,
+    reason: "harassment",
+    details: "Synthetic permanent-suspension report. No real member involved.",
+  }).select("id,reason,details").single();
+  if (heldReportError) throw new Error(`permanent-subject report failed: ${heldReportError.message}`);
+
+  const { error: heldDeletionError } = await clients.subject.rpc("delete_own_account", { confirmation: "DELETE" });
+  assert(Boolean(heldDeletionError), "subject deleted an account while a moderation case was open");
+
+  console.log("E2E 14: safety admin cannot overturn a CEO permanent suspension");
+  const { data: permanentCases, error: permanentCaseError } = await clients.ceo.from("moderation_cases").select("id").eq("report_id", heldReport.id);
+  if (permanentCaseError) throw new Error(`permanent case lookup failed: ${permanentCaseError.message}`);
+  assert(permanentCases?.length === 1, "permanent-subject report did not create one case");
+  const permanentCaseId = permanentCases[0].id;
+
+  const { error: permanentError } = await clients.ceo.rpc("moderate_case", {
+    target_case_id: permanentCaseId,
+    requested_action: "permanently_suspended",
+    action_reason: "Synthetic CEO permanent suspension",
+    suspension_hours: 72,
+  });
+  if (permanentError) throw new Error(`CEO permanent suspension failed: ${permanentError.message}`);
+
+  const { error: suspendedDeletionError } = await clients.subject.rpc("delete_own_account", { confirmation: "DELETE" });
+  assert(Boolean(suspendedDeletionError), "permanently suspended subject deleted the account");
+
+  const { data: permanentAppealId, error: permanentAppealError } = await clients.subject.rpc("submit_moderation_appeal", {
+    target_case_id: permanentCaseId,
+    appeal_statement: "Synthetic appeal of a CEO permanent suspension.",
+  });
+  if (permanentAppealError) throw new Error(`permanent appeal submission failed: ${permanentAppealError.message}`);
+  assert(Boolean(permanentAppealId), "permanent appeal submission returned no appeal ID");
+
+  const { error: safetyOverturnError } = await clients.reviewer.rpc("review_moderation_appeal", {
+    target_appeal_id: permanentAppealId,
+    decision: "overturned",
+    decision_reason: "Safety admin must not reverse a CEO permanent suspension",
+  });
+  assert(Boolean(safetyOverturnError), "safety administrator overturned a CEO permanent suspension");
+
+  const { data: stillSuspended, error: stillSuspendedError } = await admin.from("profiles").select("safety_status").eq("id", subjectUser.id).single();
+  if (stillSuspendedError) throw new Error(`permanent status check failed: ${stillSuspendedError.message}`);
+  assert(stillSuspended.safety_status === "permanently_suspended", "failed safety-admin overturn changed the suspension");
+
+  console.log("E2E 15: a different CEO overturns the permanent suspension");
+  const { error: ceoOverturnError } = await clients.secondCeo.rpc("review_moderation_appeal", {
+    target_appeal_id: permanentAppealId,
+    decision: "overturned",
+    decision_reason: "Second CEO reversed the permanent suspension",
+  });
+  if (ceoOverturnError) throw new Error(`second CEO overturn failed: ${ceoOverturnError.message}`);
+
+  const { data: restoredSubject, error: restoredSubjectError } = await admin.from("profiles").select("safety_status").eq("id", subjectUser.id).single();
+  if (restoredSubjectError) throw new Error(`restored permanent subject check failed: ${restoredSubjectError.message}`);
+  assert(restoredSubject.safety_status === "active", "CEO overturn did not reactivate the permanently suspended member");
+
+  const { data: overturnActions, error: overturnActionsError } = await admin.from("moderation_actions").select("action").eq("case_id", permanentCaseId).eq("action", "appeal_overturned");
+  if (overturnActionsError) throw new Error(`permanent appeal audit read failed: ${overturnActionsError.message}`);
+  assert(overturnActions?.length === 1, "CEO overturn did not write appeal_overturned");
+
+  console.log("E2E 16: deletion after closure preserves the allegation");
+  const { data: preservedDeleteResult, error: preservedDeleteError } = await clients.subject.rpc("delete_own_account", { confirmation: "DELETE" });
+  if (preservedDeleteError) throw new Error(`closed-case deletion failed: ${preservedDeleteError.message}`);
+  assert(preservedDeleteResult === true, "closed-case deletion did not return success");
+  const subjectIndex = createdUserIds.indexOf(subjectUser.id);
+  if (subjectIndex >= 0) createdUserIds.splice(subjectIndex, 1);
+
+  const { data: preservedReport, error: preservedReportError } = await admin.from("reports").select("id,reason,details,reported_id").eq("id", heldReport.id).single();
+  if (preservedReportError) throw new Error(`preserved report read failed: ${preservedReportError.message}`);
+  assert(preservedReport.reason === heldReport.reason, "deletion removed the report reason");
+  assert(preservedReport.details === heldReport.details, "deletion removed the report details");
+  assert(preservedReport.reported_id === null, "deletion did not detach the deleted subject from the report");
 
   console.log("AUTHENTICATED BUILD 03 SYNTHETIC E2E PASS");
 }
