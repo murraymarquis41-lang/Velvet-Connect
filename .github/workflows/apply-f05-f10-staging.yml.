@@ -1,0 +1,39 @@
+name: Apply F-05 F-10 staging migration once
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  apply:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Apply the one staging migration
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$SUPABASE_ACCESS_TOKEN"
+          python3 - << 'PY'
+          import json, os, urllib.error, urllib.request
+          sql = open("supabase/migrations/20261021192300_f05_f10_permanent_appeal_and_deletion_hold.sql").read()
+          req = urllib.request.Request(
+              "https://api.supabase.com/v1/projects/qqintbwoalvoegvqoxlo/database/query",
+              data=json.dumps({"query": sql}).encode(),
+              headers={
+                  "Authorization": "Bearer " + os.environ["SUPABASE_ACCESS_TOKEN"],
+                  "Content-Type": "application/json",
+              },
+              method="POST",
+          )
+          try:
+              with urllib.request.urlopen(req) as res:
+                  print("HTTP", res.status)
+          except urllib.error.HTTPError as err:
+              print("HTTP", err.code)
+              raise SystemExit(1)
+          PY
