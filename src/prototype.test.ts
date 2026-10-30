@@ -79,4 +79,16 @@ describe("authoritative static prototype", () => {
     expect(migration).not.toContain("delete from storage.objects");
     expect(migration).toContain("alter table public.moderation_cases force row level security");
   });
+
+  it("commits the F-05 and F-10 remediation", async () => {
+    const migration = await readFile(
+      new URL("../supabase/migrations/20261021192300_f05_f10_permanent_appeal_and_deletion_hold.sql", import.meta.url),
+      "utf8",
+    );
+
+    expect(migration).toContain("CEO authorization required to overturn a permanent suspension");
+    expect(migration).toContain("Account deletion is held while a moderation case is open");
+    expect(migration).toContain("Account deletion is held while the account is suspended");
+    expect(migration).toContain("on delete set null");
+  });
 });
