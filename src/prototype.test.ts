@@ -26,6 +26,11 @@ describe("authoritative static prototype", () => {
     expect(html).toContain('src="./src/app.ts"');
     expect(html).toContain('id="environmentBanner"');
     expect(html).toContain('id="signupEntryButton"');
+    expect(html).toContain("./enrollment-qr.svg");
+    expect(html).toContain("./verification-qr.svg");
+    expect(html).toContain("./logo.png");
+    expect(html).toContain('href="https://murraymarquis41-lang.github.io/Velvet-Connect/#enroll"');
+    expect(html).toContain("pointer-events: none");
     expect(html).not.toContain("password:'123456'");
   });
 
@@ -41,6 +46,7 @@ describe("authoritative static prototype", () => {
     expect(app).toContain("VITE_SUPABASE_URL");
     expect(app).toContain("VITE_SUPABASE_PUBLISHABLE_KEY");
     expect(app).toContain("VITE_ENABLE_ENROLLMENT");
+    expect(app).toContain('"#enroll"');
     expect(app).toContain('rpc("delete_own_account"');
     expect(app).toContain('rpc("moderate_case"');
     expect(app).toContain('rpc("review_moderation_appeal"');

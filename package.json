@@ -23,12 +23,13 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.68.0",
     "vite": "^6.4.3",
-    "vitest": "^4.1.11"
+    "vitest": "4.1.12"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.112.4"
   },
   "overrides": {
-    "js-yaml": "4.3.2"
+    "js-yaml": "4.3.2",
+    "@vitest/mocker": "4.1.12"
   }
 }
