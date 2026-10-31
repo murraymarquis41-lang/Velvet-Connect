@@ -16,7 +16,8 @@
     "build": "vite build",
     "test:issue17:sql": "node scripts/test-issue17-sql.mjs",
     "test:issue17:live": "node scripts/e2e-issue17.mjs",
-    "test:issue17:purger": "node --test scripts/test-issue17-purger.mjs"
+    "test:issue17:purger": "node --test scripts/test-issue17-purger.mjs",
+    "test:issue17:purge-health": "node --test scripts/test-issue17-purge-health.mjs"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.3.14",

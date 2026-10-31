@@ -50,7 +50,7 @@ jobs:
 
       - run: npm ci
 
-      - run: npm run test:issue17:purger
+      - run: npm run test:issue17:purger && npm run test:issue17:purge-health
 
       - name: Run staging evidence purge
         env:
@@ -64,6 +64,16 @@ jobs:
           mkdir -p /tmp/issue17-purge
           node scripts/purge-moderation-evidence.mjs > /tmp/issue17-purge/result.json 2> /tmp/issue17-purge/stderr.log
           cat /tmp/issue17-purge/result.json
+
+      - name: Backlog health check (read-only)
+        if: always()
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/issue17-purge
+          node scripts/issue17-purge-health.mjs > /tmp/issue17-purge/health.json 2> /tmp/issue17-purge/health-stderr.log
+          cat /tmp/issue17-purge/health.json
 
       - uses: actions/upload-artifact@v4
         if: always()

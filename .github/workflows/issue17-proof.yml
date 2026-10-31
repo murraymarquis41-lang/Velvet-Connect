@@ -28,7 +28,7 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm run lint && npm run typecheck && npm test && npm run test:issue17:sql && npm run test:issue17:purger
+      - run: npm run lint && npm run typecheck && npm test && npm run test:issue17:sql && npm run test:issue17:purger && npm run test:issue17:purge-health
         env:
           ISSUE17_SQL_REPORT: /tmp/issue17-sql-results.json
       - run: npm run build
