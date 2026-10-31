@@ -40,7 +40,7 @@ New public RPCs: list_my_moderation_responses, request_moderation_case_response,
 
 ## Retention decision — APPROVED 2026-10-31
 
-Approved by Rashaad Murray (Rashaad.murray1@icloud.com), email reply "Approved" with no conditions, Sat Oct 31, 2026 3:18:58 PM EDT (Gmail thread "Privacy sign-off request: Velvet Connect Issue 17 evidence/statement retention (30 days)"). The proposal below is the approved text.
+Approved by Rashaad Murray (Rashaad.murray1@icloud.com), email reply "Approved" with no conditions, Sat Oct 31, 2026 3:18:58 PM EDT (Gmail thread "Privacy sign-off request: Velvet Connect Issue 17 evidence/statement retention (30 days)"). Rashaad Murray is an independent privacy reviewer, not on the Velvet Connect build team. The proposal below is the approved text.
 
 - New statements: 30 days from first submission; edits do not extend created_at/expires_at. Existing statements use their recorded created_at + 30 days.
 - Evidence: 30 days from reservation, regardless of case outcome. Reservations older than 15 minutes without finalization enter cleanup. No automatic legal hold or indefinite extension.
