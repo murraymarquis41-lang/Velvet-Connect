@@ -207,6 +207,12 @@ async function run() {
   });
   assert(Boolean(selfReviewError), "original case assignee was able to review the appeal");
 
+  // Compatibility baseline: new issue17 deployments require an explicit
+  // independent claim. Only a missing legacy RPC may use the older baseline.
+  // Complete issue17 proof is always the separate fail-closed live suite.
+  const { error: claimAppealError } = await clients.reviewer.rpc("claim_moderation_appeal", { target_appeal_id: appealId });
+  if (claimAppealError && claimAppealError.code !== "PGRST202") throw new Error("independent appeal claim failed");
+  console.log(claimAppealError ? "Legacy staging baseline; issue17 full flow remains untested" : "Independent appeal claim succeeded");
   const { error: independentReviewError } = await clients.reviewer.rpc("review_moderation_appeal", {
     target_appeal_id: appealId,
     decision: "overturned",
@@ -280,18 +286,25 @@ async function run() {
   if (permanentAppealError) throw new Error(`permanent appeal submission failed: ${permanentAppealError.message}`);
   assert(Boolean(permanentAppealId), "permanent appeal submission returned no appeal ID");
 
+  // Issue 17: review requires an explicit independent claim. The safety admin
+  // claims first so the denial below proves the CEO-only rule, not a missing claim.
+  const { error: reviewerClaimError } = await clients.reviewer.rpc("claim_moderation_appeal", { target_appeal_id: permanentAppealId });
+  if (reviewerClaimError && reviewerClaimError.code !== "PGRST202") throw new Error(`safety admin permanent appeal claim failed: ${reviewerClaimError.message}`);
   const { error: safetyOverturnError } = await clients.reviewer.rpc("review_moderation_appeal", {
     target_appeal_id: permanentAppealId,
     decision: "overturned",
     decision_reason: "Safety admin must not reverse a CEO permanent suspension",
   });
   assert(Boolean(safetyOverturnError), "safety administrator overturned a CEO permanent suspension");
+  if (!reviewerClaimError) assert(/CEO authorization required/.test(safetyOverturnError.message), `safety admin overturn denied for the wrong reason: ${safetyOverturnError.message}`);
 
   const { data: stillSuspended, error: stillSuspendedError } = await admin.from("profiles").select("safety_status").eq("id", subjectUser.id).single();
   if (stillSuspendedError) throw new Error(`permanent status check failed: ${stillSuspendedError.message}`);
   assert(stillSuspended.safety_status === "permanently_suspended", "failed safety-admin overturn changed the suspension");
 
   console.log("E2E 15: a different CEO overturns the permanent suspension");
+  const { error: ceoClaimError } = await clients.secondCeo.rpc("claim_moderation_appeal", { target_appeal_id: permanentAppealId });
+  if (ceoClaimError && ceoClaimError.code !== "PGRST202") throw new Error(`second CEO permanent appeal claim failed: ${ceoClaimError.message}`);
   const { error: ceoOverturnError } = await clients.secondCeo.rpc("review_moderation_appeal", {
     target_appeal_id: permanentAppealId,
     decision: "overturned",
@@ -342,3 +355,4 @@ if (cleanupFailures.length > 0) {
 }
 if (runFailure) throw runFailure;
 console.log("SYNTHETIC CLEANUP PASS");
+

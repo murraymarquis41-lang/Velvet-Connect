@@ -60,7 +60,7 @@ jobs:
       - run: npm ci
         if: steps.guard.outputs.ready == 'true'
 
-      - run: npm run test:issue17:purger
+      - run: npm run test:issue17:purger && npm run test:issue17:purge-health
         if: steps.guard.outputs.ready == 'true'
 
       - name: Run staging evidence purge
@@ -76,6 +76,16 @@ jobs:
           mkdir -p /tmp/issue17-purge
           node scripts/purge-moderation-evidence.mjs > /tmp/issue17-purge/result.json 2> /tmp/issue17-purge/stderr.log
           cat /tmp/issue17-purge/result.json
+
+      - name: Backlog health check (read-only)
+        if: always() && steps.guard.outputs.ready == 'true'
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/issue17-purge
+          node scripts/issue17-purge-health.mjs > /tmp/issue17-purge/health.json 2> /tmp/issue17-purge/health-stderr.log
+          cat /tmp/issue17-purge/health.json
 
       - uses: actions/upload-artifact@v4
         if: always() && steps.guard.outputs.ready == 'true'
