@@ -44,7 +44,7 @@ Authorized scope:
 | Supabase security advisor | OPEN — HUMAN REVIEW / AUTH SETTING REQUIRED | Fresh 2026-09-13 output records six intentional authenticated `SECURITY DEFINER` warnings, now including `admin_diagnostics`, plus a separate warning that leaked-password protection is disabled. Obtain independent human acceptance of the privileged-function design and enable or explicitly disposition leaked-password protection before closure. |
 | Supabase performance advisor | OPEN — LOW-SEVERITY REMEDIATION | Fresh 2026-09-11 output reports one unindexed foreign key and four unused-index INFO findings, plus one WARN for multiple permissive SELECT policies on `moderation_case_statements`. Resolve or document the WARN; retain unused indexes until representative traffic exists. |
 | Independent human security review | OPEN | Reviewer must inspect exact final SHA, RLS, grants, privileged RPCs, admin-role provisioning, reporting/evidence flow, deletion, and deployment configuration. |
-| Independent privacy review | OPEN | Reviewer must inspect data minimization, report/evidence retention, age-assurance data flow, deletion, logging, and vendor requirements. |
+| Independent privacy review | PARTIAL | Issue 17 report/evidence 30-day retention and deletion approved by Rashaad Murray (email, 2026-10-31 3:18:58 PM EDT, no conditions). Still open: data minimization overall, age-assurance data flow, logging, and vendor requirements. |
 | GitHub Pages exact-SHA deployment | PASS at evidence baseline | Deployment run [34256429668](https://github.com/murraymarquis41-lang/Velvet-Connect/actions/runs/34256429668) succeeded for `7b8d44cdeede7d1b55290387a8c1053ba8370c83`. Final candidate must repeat this gate. |
 | Public exact-SHA release smoke | PASS at evidence baseline | Smoke run [34256429709](https://github.com/murraymarquis41-lang/Velvet-Connect/actions/runs/34256429709) verified public metadata for `7b8d44cdeede7d1b55290387a8c1053ba8370c83` with enrollment paused. Final candidate must repeat this gate. |
 | Build identity/tag reconciliation | OPEN / CONTROLLED | PR #15 and its feature branch matched `7b8d44cdeede7d1b55290387a8c1053ba8370c83` at sprint start. The existing annotated `build-03` tag still resolves to original milestone `d04ba7eb83bf98b36ce448c3761274cf7a7beefd`; do not move it until closure changes stop, the final SHA is frozen, and all gates pass. |
@@ -62,7 +62,7 @@ The corrected safety-reporting flow must preserve the controls that already pass
 6. Automated severity/routing may prioritize cases but cannot impose permanent enforcement.
 7. Every human moderation action requires a reason and remains auditable.
 8. Appeals remain independently reviewed by someone other than the original case assignee.
-9. Retention/deletion rules for report evidence are documented and privacy-reviewed.
+9. Retention/deletion rules for report evidence are documented and privacy-reviewed. (Issue 17 retention approved by Rashaad Murray, 2026-10-31 3:18:58 PM EDT.)
 10. Authenticated QA demonstrates the complete flow under RLS with synthetic data.
 
 ## Independent security/privacy review packet — minimum questions

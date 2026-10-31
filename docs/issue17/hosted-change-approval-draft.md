@@ -47,7 +47,9 @@ Do **not** reapply `20260921040000`. Hosted already has it as `20260926024046_gr
 ## 4. Uploads off by default
 The migration leaves `private.evidence_policy.uploads_enabled = false`. Turn it on (`update private.evidence_policy set uploads_enabled=true where singleton;`) only once retention is accepted **and** the cleanup schedule with alerts is running. Turning it on is a separate approval step. No Auth, production, or enrollment configuration changes.
 
-## 5. Privacy notes: 30-day retention (PENDING, NOT APPROVED)
+## 5. Privacy notes: 30-day retention (APPROVED)
+
+**Privacy sign-off:** Approved by Rashaad Murray (Rashaad.murray1@icloud.com), email reply "Approved" with no conditions, Sat Oct 31, 2026 3:18:58 PM EDT (Gmail thread "Privacy sign-off request: Velvet Connect Issue 17 evidence/statement retention (30 days)"). Scope: the 30-day statement/evidence retention and deletion rules and caveats in this section. Uploads remain disabled until D; production remains NO-GO.
 - Statements expire 30 days after first submission, and edits do not extend that. Existing statements expire at `created_at` + 30 days.
 - Evidence expires 30 days after reservation, whatever the case outcome. Reservations not finalized within 15 minutes are cleaned up. There is no automatic legal hold.
 - Expired content and content with a deletion request becomes unreadable at once. Bytes are deleted by the Storage API purger: `scripts/purge-moderation-evidence.mjs`, every 15 minutes, a 1-hour retry window, plus an orphan sweep.
@@ -98,7 +100,7 @@ The migration leaves `private.evidence_policy.uploads_enabled = false`. Turn it 
 **Current local evidence:** 15 SQL/RLS scenarios, 3 purger contract tests, 7 purge-health tests, 5 Vitest tests, plus lint, typecheck, and build pass. Hosted proof so far is limited to the staging purge run and CI listed in the status section below.
 
 ## 9. Approval requested (separately, in order)
-- [x] A: Security/privacy design — done. **The 30-day retention is still pending privacy sign-off** and is not privacy-approved.
+- [x] A: Security/privacy design and the 30-day retention — done. Retention privacy-approved by Rashaad Murray, 2026-10-31 3:18:58 PM EDT (no conditions).
 - [x] B: Apply migrations (§3 list, finalized) and create the bucket on `qqintbwoalvoegvqoxlo` — done (migrations + private bucket).
 - [ ] C: Cleanup worker schedule and alerts — partial: schedule on, first manual run PASS, alerts are email-only. Not fully done.
 - [ ] D: Set `uploads_enabled=true` in staging — open (still false).

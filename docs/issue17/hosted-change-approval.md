@@ -4,7 +4,7 @@ NO-GO. No hosted schema/Storage changes, deployment, merge, enrollment, tag move
 
 
 ## Current status as of 2026-10-31 (PR #21 head `024fa3e` before this docs commit)
-Supersedes the "no hosted changes" wording above for staging only: staging changes below were separately approved and applied. Checklist: A design done / retention privacy pending; B done; C partial (schedule on, alerts email-only); D and E open.
+Supersedes the "no hosted changes" wording above for staging only: staging changes below were separately approved and applied. Checklist: A done (30-day retention privacy-approved by Rashaad Murray, 2026-10-31 3:18:58 PM EDT, no conditions); B done; C partial (schedule on, alerts email-only); D and E open.
 - Staging `qqintbwoalvoegvqoxlo` only. Applied: `issue_17_evidence_and_appeal_controls`, `issue_17_reconcile_permanent_appeal_review`, `issue_17_evidence_purge_stats`. Private `moderation-evidence` bucket (PNG/JPEG, 5 MB) exists.
 - `private.evidence_policy.uploads_enabled` remains **false**.
 - First manual purge run [41231229423](https://github.com/murraymarquis41-lang/Velvet-Connect/actions/runs/41231229423): purge PASS (`removed:0`), health PASS (queue 0, overdue 0, orphans 0).
@@ -38,7 +38,9 @@ The migration:
 
 New public RPCs: list_my_moderation_responses, request_moderation_case_response, reserve_moderation_evidence, finalize_moderation_evidence, request_moderation_evidence_deletion, claim_moderation_appeal, list_moderation_appeal_queue. New cleanup RPCs (service role only): list_moderation_evidence_purge, ack_moderation_evidence_purge, purge_expired_moderation_statements. Existing statement, moderation, submit/review appeal functions are revised. Privileged functions use an empty search_path, explicit authorization, and revoked PUBLIC/anon execution. Independent review must accept or remediate these SECURITY DEFINER boundaries.
 
-## Proposed retention decision — NOT APPROVED
+## Retention decision — APPROVED 2026-10-31
+
+Approved by Rashaad Murray (Rashaad.murray1@icloud.com), email reply "Approved" with no conditions, Sat Oct 31, 2026 3:18:58 PM EDT (Gmail thread "Privacy sign-off request: Velvet Connect Issue 17 evidence/statement retention (30 days)"). The proposal below is the approved text.
 
 - New statements: 30 days from first submission; edits do not extend created_at/expires_at. Existing statements use their recorded created_at + 30 days.
 - Evidence: 30 days from reservation, regardless of case outcome. Reservations older than 15 minutes without finalization enter cleanup. No automatic legal hold or indefinite extension.
@@ -46,7 +48,7 @@ New public RPCs: list_my_moderation_responses, request_moderation_case_response,
 - Either party's account deletion: associated case statements are removed; evidence metadata is removed and opaque object keys queued for Storage API deletion. Immutable audit is retained under the existing audit rules, outside this new material schedule.
 - Purge runs every 15 minutes after separately approved scheduling. A queued key remains retryable for one hour to catch an upload/deletion race; cleanup does not claim success for bytes based only on metadata deletion. An API-based orphan sweep also removes bytes with no evidence metadata, including late uploads after the retry window.
 - Service outage: expiration still denies access; physical deletion is delayed until cleanup succeeds. Alert an operator on a failed run. Do not describe delayed bytes as already erased.
-- Reviewer must assess the 30-day schedule, earlier deletion effects on open cases/appeals, audit retention, backups/provider retention, legal preservation requirements, and existing initial report text. No claim that these policies are privacy-approved.
+- Reviewer must assess the 30-day schedule, earlier deletion effects on open cases/appeals, audit retention, backups/provider retention, legal preservation requirements, and existing initial report text. Privacy approval recorded above (2026-10-31).
 
 ## Proposed hosted execution sequence — requires separate approval
 
