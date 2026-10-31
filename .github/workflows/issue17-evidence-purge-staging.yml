@@ -1,0 +1,74 @@
+name: Issue 17 evidence purge (staging, manual)
+
+# Issue #17 checklist item C. Manual dispatch ONLY.
+# Automatic scheduling requires separate Marquis approval (item C).
+# Do not uncomment the schedule below until that approval is recorded.
+on:
+  workflow_dispatch:
+    inputs:
+      hosted_approved:
+        description: 'Separate founder approval for issue17 staging evidence cleanup run is recorded'
+        type: boolean
+        default: false
+  # schedule:
+  #   - cron: '*/15 * * * *'  # every 15 min (UTC; same in America/New_York). Needs Marquis approval.
+
+permissions:
+  contents: read
+
+concurrency:
+  group: issue17-evidence-purge-staging
+  cancel-in-progress: false
+
+jobs:
+  purge:
+    if: inputs.hosted_approved
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      SUPABASE_URL: https://qqintbwoalvoegvqoxlo.supabase.co
+      ISSUE17_HOSTED_APPROVED: 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Staging-only guard
+        run: |
+          set -euo pipefail
+          if [ "${SUPABASE_URL}" != "https://qqintbwoalvoegvqoxlo.supabase.co" ]; then
+            echo "Refusing: SUPABASE_URL is not the staging project." >&2
+            exit 1
+          fi
+          if [ ! -f scripts/purge-moderation-evidence.mjs ]; then
+            echo "Purger not present on this ref (lands with PR #21)." >&2
+            exit 1
+          fi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run test:issue17:purger
+
+      - name: Run staging evidence purge
+        env:
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SUPABASE_SERVICE_ROLE_KEY}" ]; then
+            echo "SUPABASE_SERVICE_ROLE_KEY is not set." >&2
+            exit 1
+          fi
+          mkdir -p /tmp/issue17-purge
+          node scripts/purge-moderation-evidence.mjs > /tmp/issue17-purge/result.json 2> /tmp/issue17-purge/stderr.log
+          cat /tmp/issue17-purge/result.json
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: issue17-evidence-purge-staging
+          path: /tmp/issue17-purge/
+          if-no-files-found: warn
+          retention-days: 30
