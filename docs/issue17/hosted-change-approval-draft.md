@@ -95,13 +95,21 @@ The migration leaves `private.evidence_policy.uploads_enabled = false`. Turn it 
 - Reported-member notice, both statement screens, the moderator queue and evidence, the independent appeal UI, and accessibility.
 - Local browser QA has **not** passed yet.
 
-**Current local evidence:** 14 SQL/RLS scenarios, 3 purger contract tests, 4 Vitest tests, plus lint, typecheck, build, and audit all pass. None of this is hosted proof.
+**Current local evidence:** 15 SQL/RLS scenarios, 3 purger contract tests, 7 purge-health tests, 5 Vitest tests, plus lint, typecheck, and build pass. Hosted proof so far is limited to the staging purge run and CI listed in the status section below.
 
 ## 9. Approval requested (separately, in order)
-- [ ] A: Security/privacy design and the 30-day retention
-- [ ] B: Apply migrations (§3 list, finalized) and create the bucket on `qqintbwoalvoegvqoxlo`
-- [ ] C: Cleanup worker schedule and alerts
-- [ ] D: Set `uploads_enabled=true` in staging
-- [ ] E: Run the hosted synthetic suite and human QA
+- [x] A: Security/privacy design — done. **The 30-day retention is still pending privacy sign-off** and is not privacy-approved.
+- [x] B: Apply migrations (§3 list, finalized) and create the bucket on `qqintbwoalvoegvqoxlo` — done (migrations + private bucket).
+- [ ] C: Cleanup worker schedule and alerts — partial: schedule on, first manual run PASS, alerts are email-only. Not fully done.
+- [ ] D: Set `uploads_enabled=true` in staging — open (still false).
+- [ ] E: Run the hosted synthetic suite and human QA — open.
 
 None of these authorizes a merge, a tag, enrollment, production, or closing #17.
+
+## Status as of 2026-10-31 (PR #21 head `024fa3e` before this docs commit)
+- Staging `qqintbwoalvoegvqoxlo` only. Applied: `issue_17_evidence_and_appeal_controls`, `issue_17_reconcile_permanent_appeal_review`, `issue_17_evidence_purge_stats`. Private `moderation-evidence` bucket (PNG/JPEG, 5 MB) exists.
+- `private.evidence_policy.uploads_enabled` remains **false**.
+- First manual purge run [41231229423](https://github.com/murraymarquis41-lang/Velvet-Connect/actions/runs/41231229423): purge PASS (`removed:0`), health PASS (queue 0, overdue 0, orphans 0).
+- `*/15` schedule is live on `main` (#31); scheduled runs skip and delete nothing until PR #21 lands. Alerts are GitHub failed-run email only.
+- CI at `024fa3e`: CI, WP-01B, Issue 17 draft proof, Authenticated synthetic E2E all passed. `complete-hosted-proof` not yet run.
+- Production remains **NO-GO**.

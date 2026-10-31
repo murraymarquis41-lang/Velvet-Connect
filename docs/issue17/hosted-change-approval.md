@@ -2,6 +2,16 @@
 
 NO-GO. No hosted schema/Storage changes, deployment, merge, enrollment, tag movement, or release certification are authorized by this document. PR15 remains draft. Independent security/privacy review is still required. Current founder authorization permits implementation and synthetic QA, with hosted changes held for separate approval.
 
+
+## Current status as of 2026-10-31 (PR #21 head `024fa3e` before this docs commit)
+Supersedes the "no hosted changes" wording above for staging only: staging changes below were separately approved and applied. Checklist: A design done / retention privacy pending; B done; C partial (schedule on, alerts email-only); D and E open.
+- Staging `qqintbwoalvoegvqoxlo` only. Applied: `issue_17_evidence_and_appeal_controls`, `issue_17_reconcile_permanent_appeal_review`, `issue_17_evidence_purge_stats`. Private `moderation-evidence` bucket (PNG/JPEG, 5 MB) exists.
+- `private.evidence_policy.uploads_enabled` remains **false**.
+- First manual purge run [41231229423](https://github.com/murraymarquis41-lang/Velvet-Connect/actions/runs/41231229423): purge PASS (`removed:0`), health PASS (queue 0, overdue 0, orphans 0).
+- `*/15` schedule is live on `main` (#31); scheduled runs skip and delete nothing until PR #21 lands. Alerts are GitHub failed-run email only.
+- CI at `024fa3e`: CI, WP-01B, Issue 17 draft proof, Authenticated synthetic E2E all passed. `complete-hosted-proof` not yet run.
+- Production remains **NO-GO**.
+
 ## Exact target and parent
 
 - Repository: murraymarquis41-lang/Velvet-Connect.
@@ -63,4 +73,4 @@ No hosted changes have been made by this implementation task. After an approved 
 
 ## Known limitations requiring review
 
-Client file validation and bucket MIME/size limits are not malware scanning, content moderation, or metadata stripping. Files are downloaded with authenticated authorization rather than rendered inline. Screenshots may contain EXIF or unrelated personal information; minimization guidance is shown, but no automated scrubbing is claimed. Downloaded files cannot be remotely revoked. Full hosted service tests and human review remain mandatory. Cleanup scheduling/alerts, backup handling, and historical appeal reconciliation are not yet deployed or accepted.
+Client file validation and bucket MIME/size limits are not malware scanning, content moderation, or metadata stripping. Files are downloaded with authenticated authorization rather than rendered inline. Screenshots may contain EXIF or unrelated personal information; minimization guidance is shown, but no automated scrubbing is claimed. Downloaded files cannot be remotely revoked. Full hosted service tests and human review remain mandatory. Cleanup scheduling is live on staging only (alerts email-only, not accepted as complete); backup handling and historical appeal reconciliation are not yet deployed or accepted.
